@@ -89,65 +89,97 @@ export class HUD {
   }
 }
 
-export const KB_KEYS = { fire: 'LMB', aim: 'RMB', block: 'RMB', jump: 'Space', sprint: 'Shift', slide: 'C', dash: 'C', grapple: 'Q', melee: 'F', reload: 'R', grenade: 'G', focus: 'Press both mouse buttons（or X）', next: 'wheel', pause: 'Esc', confirm: 'Space', score: 'Tab' };
+export const KB_KEYS = { fire: 'LMB', aim: 'RMB', block: 'RMB', jump: 'Space', sprint: 'Shift', slide: 'C', dash: 'C', grapple: 'Q', melee: 'F', reload: 'R', grenade: 'G', focus: 'Press both mouse buttons (or X)', next: 'wheel', pause: 'Esc', confirm: 'Space', score: 'Tab' };
 export const PAD_KEYS = { fire: 'R2', aim: 'L2', block: 'L2', jump: '✕', sprint: 'L3', slide: '○', dash: '○', grapple: 'L1', melee: 'R1', reload: '□', grenade: 'R3', focus: 'L2 + R2', next: '△', pause: 'Options', confirm: '✕', score: 'Create' };
 export const START_CONTROLS_HTML = `
-<div class="start-controls" aria-label="Controls">
-  <div class="control-device keyboard-device">
+<div class="start-controls" aria-label="Game controls">
+  <div class="control-device">
     <div class="device-title">MOUSE + KEYBOARD</div>
-    <div class="device-art"><svg class="doodle-keyboard" viewBox="0 0 520 250" role="img" aria-label="Doodle keyboard and mouse">
-      <g class="mouse" transform="translate(40 25) rotate(-7)"><path d="M38 14 C13 15 2 34 5 65 C8 101 23 119 47 118 C72 117 86 95 84 62 C82 30 66 13 38 14Z"/><path d="M8 56 C28 50 61 50 82 57"/><path d="M45 18 L45 56"/><rect x="39" y="29" width="12" height="18" rx="5"/></g>
-      <g class="keyboard" transform="translate(132 56) rotate(-2)"><path d="M8 12 Q12 3 23 4 L360 4 Q373 5 378 16 L397 170 Q399 184 385 187 L24 187 Q10 186 9 173Z"/>
-        <g class="keys"><rect x="27" y="22" width="34" height="24"/><rect x="66" y="22" width="34" height="24"/><rect x="105" y="22" width="34" height="24"/><rect x="144" y="22" width="34" height="24"/><rect x="183" y="22" width="34" height="24"/><rect x="222" y="22" width="34" height="24"/><rect x="261" y="22" width="34" height="24"/><rect x="300" y="22" width="34" height="24"/>
-          <rect class="hot" x="27" y="54" width="38" height="27"/><rect class="hot" x="70" y="54" width="38" height="27"/><rect class="hot" x="113" y="54" width="38" height="27"/><rect x="156" y="54" width="38" height="27"/><rect x="199" y="54" width="38" height="27"/><rect x="242" y="54" width="38" height="27"/><rect x="285" y="54" width="48" height="27"/>
-          <rect x="27" y="88" width="52" height="27"/><rect x="84" y="88" width="38" height="27"/><rect x="127" y="88" width="38" height="27"/><rect x="170" y="88" width="38" height="27"/><rect x="213" y="88" width="38" height="27"/><rect x="256" y="88" width="38" height="27"/><rect class="hot" x="299" y="88" width="34" height="27"/>
-          <rect x="27" y="122" width="48" height="27"/><rect x="80" y="122" width="48" height="27"/><rect x="133" y="122" width="48" height="27"/><rect class="hot" x="186" y="122" width="115" height="27"/><rect x="306" y="122" width="27" height="27"/></g>
-        <text x="39" y="73">W</text><text x="82" y="73">A</text><text x="125" y="73">S</text><text x="311" y="106">R</text><text x="226" y="140">SPACE</text></g>
-      <g class="leader-lines"><path d="M175 91 C125 78 83 83 25 102"/><path d="M266 145 C335 126 403 119 493 100"/><path d="M238 178 C310 190 387 192 490 181"/></g>
-      <g class="callout"><text x="10" y="110">WASD · MOVE</text><text x="352" y="97">R · RELOAD</text><text x="365" y="183">SPACE · JUMP</text></g>
-    </svg></div>
-    <div class="control-row"><span class="key-pill">LMB</span><span>FIRE</span><span class="key-pill">RMB</span><span>AIM / BLOCK</span></div>
-    <div class="control-row"><span class="key-pill">SHIFT</span><span>SPRINT</span><span class="key-pill">C</span><span>SLIDE / DASH</span></div>
-    <div class="control-row"><span class="key-pill">Q</span><span>GRAPPLE</span><span class="key-pill">G</span><span>GRENADE</span></div>
+    <div class="device-art">
+      <svg class="real-illustration keyboard-illustration" viewBox="0 0 560 270" role="img" aria-label="Mouse and keyboard illustration">
+        <defs>
+          <linearGradient id="kbBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9e6da"/></linearGradient>
+          <linearGradient id="mouseBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8e5db"/></linearGradient>
+        </defs>
+        <g class="illustration-ink">
+          <g transform="translate(18 28) rotate(-7)">
+            <path class="device-fill" d="M42 8C16 8 3 28 5 62c2 35 16 55 40 55s38-20 39-54C85 29 69 8 42 8Z"/>
+            <path d="M7 55c20-6 56-6 76 0M43 11v43"/>
+            <rect class="orange-detail" x="37" y="24" width="12" height="19" rx="6"/>
+          </g>
+          <g transform="translate(120 48) rotate(-2)">
+            <path class="device-fill" d="M12 8c2-5 7-7 14-7h350c8 0 13 4 15 11l19 162c1 9-5 14-14 14H25c-9 0-14-5-15-14Z"/>
+            <path d="M28 25h338"/>
+            <g class="key">
+              <rect x="30" y="38" width="29" height="21"/><rect x="65" y="38" width="29" height="21"/><rect x="100" y="38" width="29" height="21"/><rect x="135" y="38" width="29" height="21"/><rect x="170" y="38" width="29" height="21"/><rect x="205" y="38" width="29" height="21"/><rect x="240" y="38" width="29" height="21"/><rect x="275" y="38" width="29" height="21"/><rect x="310" y="38" width="29" height="21"/>
+              <rect class="hot" x="30" y="68" width="38" height="25"/><rect class="hot" x="73" y="68" width="38" height="25"/><rect class="hot" x="116" y="68" width="38" height="25"/>
+              <rect x="159" y="68" width="38" height="25"/><rect x="202" y="68" width="38" height="25"/><rect x="245" y="68" width="38" height="25"/><rect x="288" y="68" width="51" height="25"/>
+              <rect x="30" y="102" width="49" height="25"/><rect x="84" y="102" width="38" height="25"/><rect x="127" y="102" width="38" height="25"/><rect x="170" y="102" width="38" height="25"/><rect x="213" y="102" width="38" height="25"/><rect x="256" y="102" width="38" height="25"/><rect class="hot" x="299" y="102" width="40" height="25"/>
+              <rect x="30" y="136" width="48" height="25"/><rect x="83" y="136" width="48" height="25"/><rect x="136" y="136" width="48" height="25"/><rect class="hot" x="192" y="136" width="120" height="25"/><rect x="319" y="136" width="20" height="25"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="control-labels">
+      <div><span class="key-pill">W A S D</span><span>MOVE</span><span class="key-pill">MOUSE</span><span>LOOK</span></div>
+      <div><span class="key-pill">LMB</span><span>FIRE</span><span class="key-pill">RMB</span><span>AIM / BLOCK</span></div>
+      <div><span class="key-pill">SPACE</span><span>JUMP</span><span class="key-pill">SHIFT</span><span>SPRINT</span></div>
+      <div><span class="key-pill">C</span><span>SLIDE / DASH</span><span class="key-pill">Q</span><span>GRAPPLE</span></div>
+    </div>
   </div>
-  <div class="control-device pad-device">
+  <div class="control-device">
     <div class="device-title">PS5 CONTROLLER</div>
-    <div class="device-art"><svg class="doodle-pad" viewBox="0 0 520 250" role="img" aria-label="Doodle PS5 controller">
-      <g class="pad" transform="translate(70 40) rotate(-2 190 85)"><path d="M50 62 C67 28 96 17 137 25 C164 31 212 31 239 25 C280 17 309 28 326 62 C342 94 351 133 345 165 C341 187 326 196 312 180 L279 143 C267 129 253 125 235 128 C202 134 165 134 132 128 C114 125 100 129 88 143 L55 180 C41 196 26 187 22 165 C16 133 25 94 50 62Z"/><path d="M87 91 h54 M114 64 v54"/><circle cx="269" cy="73" r="11"/><circle cx="301" cy="91" r="11"/><circle cx="269" cy="109" r="11"/><circle cx="237" cy="91" r="11"/><circle cx="166" cy="83" r="27"/><circle cx="236" cy="83" r="27"/><path class="hot-dot" d="M113 158 q12 -10 24 0"/><path class="hot-dot" d="M275 158 q12 -10 24 0"/></g>
-      <g class="leader-lines"><path d="M180 120 C120 90 67 80 15 70"/><path d="M355 106 C405 83 447 78 508 70"/><path d="M300 192 C363 211 425 216 505 208"/><path d="M135 192 C94 211 54 216 12 208"/></g>
-      <g class="callout"><text x="8" y="66">L3 · SPRINT</text><text x="400" y="66">R2 · FIRE</text><text x="415" y="211">✕ · JUMP</text><text x="8" y="211">L2 · AIM</text></g>
-    </svg></div>
-    <div class="control-row"><span class="key-pill">L2</span><span>AIM / BLOCK</span><span class="key-pill">R2</span><span>FIRE</span></div>
-    <div class="control-row"><span class="key-pill">L3</span><span>SPRINT</span><span class="key-pill">○</span><span>SLIDE / DASH</span></div>
-    <div class="control-row"><span class="key-pill">✕</span><span>JUMP</span><span class="key-pill">□</span><span>RELOAD</span></div>
+    <div class="device-art">
+      <svg class="real-illustration controller-illustration" viewBox="0 0 560 270" role="img" aria-label="PS5 controller illustration">
+        <defs>
+          <linearGradient id="padBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e5e4df"/></linearGradient>
+        </defs>
+        <g class="illustration-ink" transform="translate(50 38)">
+          <path class="device-fill" d="M55 66C70 31 102 15 140 24c35 8 67 10 100 0 38-9 70 7 85 42 15 34 23 78 17 105-4 19-20 28-34 11l-31-39c-10-13-23-18-41-15-35 6-70 6-105 0-18-3-31 2-41 15l-31 39c-14 17-30 8-34-11-6-27 2-71 17-105Z"/>
+          <path d="M83 92h53M109 66v52"/>
+          <circle cx="169" cy="91" r="27"/><circle cx="239" cy="91" r="27"/>
+          <circle cx="316" cy="72" r="10"/><circle cx="345" cy="91" r="10"/><circle cx="316" cy="110" r="10"/><circle cx="287" cy="91" r="10"/>
+          <path class="orange-detail" d="M108 151q13-11 26 0M292 151q13-11 26 0"/>
+          <path d="M190 42h30M205 27v30"/>
+        </g>
+      </svg>
+    </div>
+    <div class="control-labels">
+      <div><span class="key-pill">L2</span><span>AIM / BLOCK</span><span class="key-pill">R2</span><span>FIRE</span></div>
+      <div><span class="key-pill">L3</span><span>SPRINT</span><span class="key-pill">○</span><span>SLIDE / DASH</span></div>
+      <div><span class="key-pill">✕</span><span>JUMP</span><span class="key-pill">□</span><span>RELOAD</span></div>
+      <div><span class="key-pill">L1</span><span>GRAPPLE</span><span class="key-pill">△</span><span>NEXT WEAPON</span></div>
+    </div>
   </div>
 </div>
-<div class="control-footer"><span>WASD / STICKS TO MOVE</span><span>•</span><span>SPACE / ✕ TO JUMP</span><span>•</span><span>CLICK OR PRESS TO START</span></div>`;
+<div class="control-footer"><span>CLICK OR PRESS ANY KEY TO START</span><span>•</span><span>WASD / STICKS TO MOVE</span></div>`;
+
 
 export const CONTROLS_HTML = `
 <div class="cols">
   <div><div class="colhead">Mouse + Keyboard</div>
     <div><b>WASD</b> Move &nbsp; <b>Mouse</b> Look &nbsp; <b>Shift</b> Sprint</div>
     <div><b>LMB</b> Fire / Slash &nbsp; <b>RMB</b> Aim / Block</div>
-    <div><b>Space</b> Jump（press again on wall = Wall Jump）</div>
+    <div><b>Space</b> Jump(press again on wall = Wall Jump)</div>
     <div>press again in air <b>Space</b> = Double Jump</div>
-    <div><b>C / Ctrl</b> Ground Slide · Air Dash</div>
-    <div><b>Q / E</b> Grapple：Tap to swing，Hold to reel in，JumpLaunch</div>
-    <div><b>F</b> KatanaSlash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
-    <div><b>G</b> Grenades · Hold to throw farther</div>
-    <div><b>Tab</b> Scoreboard（Online） &nbsp; <b>Esc</b> Pause</div>
+    <div><b>C / Ctrl</b> Ground Slide  -  Air Dash</div>
+    <div><b>Q / E</b> Grapple:Tap to swing,Hold to reel in,jump launch</div>
+    <div><b>F</b> Katana slash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
+    <div><b>G</b> Grenades  -  Hold to throw farther</div>
+    <div><b>Tab</b> Scoreboard(Online) &nbsp; <b>Esc</b> Pause</div>
     <div><b>Press both mouse buttons</b> Dash slash when full</div>
-    <div><b>1-4 / wheel</b> Rifle · Shotgun · Sniper Rifle · Katana</div>
+    <div><b>1-4 / wheel</b> Rifle  -  Shotgun  -  Sniper Rifle  -  Katana</div>
   </div>
   <div><div class="colhead">PS5 Controller</div>
     <div><b>Left Stick</b> Move &nbsp; <b>Right Stick</b> Look &nbsp; <b>L3</b> Sprint</div>
     <div><b>R2</b> Fire / Slash &nbsp; <b>L2</b> Aim / Block</div>
-    <div><b>✕</b> Jump &nbsp; <b>○</b> Slide · Air Dash</div>
-    <div><b>L1</b> Grapple（Hold to reel in，✕ Launch）</div>
+    <div><b>✕</b> Jump &nbsp; <b>○</b> Slide  -  Air Dash</div>
+    <div><b>L1</b> Grapple(Hold to reel in,✕ Launch)</div>
     <div><b>L2 + R2</b> KatanaDash slash when full</div>
-    <div><b>R1</b> KatanaSlash，then auto-switch back to guns</div>
+    <div><b>R1</b> Katana slash,then auto-switch back to guns</div>
     <div><b>□</b> Reload &nbsp; <b>△</b> Next weapon</div>
-    <div><b>R3 / D-pad Up</b> Grenades · Hold to throw farther</div>
-    <div><b>Create</b> Scoreboard（Online） &nbsp; <b>Options</b> Pause</div>
+    <div><b>R3 / D-pad Up</b> Grenades  -  Hold to throw farther</div>
+    <div><b>Create</b> Scoreboard(Online) &nbsp; <b>Options</b> Pause</div>
   </div>
 </div>`;
