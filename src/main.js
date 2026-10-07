@@ -44,7 +44,7 @@ const ctx = { scene: R.scene, camera: R.camera, world, level, nav, input, hud, e
 let best = Number(localStorage.getItem('doodle_best') || 0);
 let musicWanted = localStorage.getItem('doodle_music') !== '0';
 let checkpoint = Number(localStorage.getItem('doodle_checkpoint') || 0);
-let myName = (localStorage.getItem('doodle_name') || '').slice(0, 14) || 'Doodle' + Math.floor(Math.random() * 90 + 10);
+let myName = (localStorage.getItem('doodle_name') || '').slice(0, 14) || 'DodNite' + Math.floor(Math.random() * 90 + 10);
 const settings = { sens: Number(localStorage.getItem('doodle_sens') || 100), invert: localStorage.getItem('doodle_invert') === '1' };
 function applySettings() {
   input.mouseSens = 0.0022 * settings.sens / 100; input.padSensX = 3.4 * settings.sens / 100; input.padSensY = 2.6 * settings.sens / 100; input.invertY = settings.invert;
@@ -225,7 +225,7 @@ const tips = () => [
   `press again in air <b>${hud.key('jump')}</b> Double Jump`,
 ];
 const bossFor = (n) => BOSSES[(Math.floor(n / 5) - 1) % BOSSES.length];
-const enemyName = (t) => ({ boss: 'Doodle', eraser: 'Eraser King', inkblot: 'Ink King' })[t] || t.toUpperCase();
+const enemyName = (t) => ({ boss: 'DodNite', eraser: 'Eraser King', inkblot: 'Ink King' })[t] || t.toUpperCase();
 function startWave(n) {
   game.wave = n; game.queue = []; game.spawnT = 2; game.intermission = 0; game.boss = null; hud.setBoss(null, null);
   const boss = n > 0 && n % 5 === 0;
@@ -471,7 +471,7 @@ async function _migrateHost() {
 net.on('refused', (d) => leaveOnline(d.reason));
 net.hostName = myName;
 net.onPeerJoin = (from, meta) => {
-  const name = String(meta && meta.name || 'doodle').slice(0, 14);
+  const name = String(meta && meta.name || 'DodNite').slice(0, 14);
   if (meta && meta.prev && meta.prev !== from) { const sc = scores.get(meta.prev); if (sc) { scores.delete(meta.prev); scores.set(from, sc); } const r = remote.get(meta.prev); if (r) r.dispose(); remote.delete(meta.prev); lobby.players.delete(meta.prev); if (lobby.order) lobby.order = lobby.order.filter((id) => id !== meta.prev); }
   lobby.players.set(from, { name }); addRemote(from, name); broadcastLobby();
   if (game.state === 'play' || game.state === 'dying') { if (!scores.has(from)) scores.set(from, { name, kills: 0, deaths: 0 }); net.sendTo(from, 'start', { late: true, spawn: farthestSpawnIndex(), map: lobby.map || mapKey, broken: level.breakables.filter((b) => !b.alive).map((b) => b.id) }); sendScores(); hud.kill(name + ' joined', 0); }
@@ -626,7 +626,7 @@ function wireMap(onPick) { const box = hud.el.panel.querySelector('#mapsel'); if
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function mainHTML() {
-  return `<h1>Doodle District</h1><h2>Doodle</h2>
+  return `<h1>DodNite</h1><h2>DodNite</h2>
     <div class="mainbtns"><button type="button" class="start" id="soloBtn">Start Game<i>Solo ·  waves waves</i></button><button type="button" id="onlineBtn">Online Match<i>Free-for-all · up to 10 players</i></button></div>
     ${mapHTML(mapKey, true)}${START_CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">Best score：${best}</div>` : ''}`;
 }
