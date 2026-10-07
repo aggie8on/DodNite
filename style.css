@@ -211,3 +211,23 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .lobbyrow { display: grid; grid-template-columns: 96px 1fr auto auto; gap: 12px; align-items: center; font-size: 19px; padding: 3px 8px; border-bottom: 1.5px solid rgba(26,48,192,.2); }
 .lobbyrow .code { font-size: 22px; letter-spacing: 3px; padding: 0 8px; border-width: 2px; }
 .lobbyrow button { font-size: 18px; padding: 3px 12px; }
+
+/* ---- animated minimal start controls ---- */
+.start-controls{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:20px auto 8px;max-width:1050px;text-align:left}
+.control-device{position:relative;padding:12px 18px 14px;border-top:2px solid rgba(26,48,192,.28)}
+.device-title{text-align:center;font-size:18px;letter-spacing:2px;opacity:.72;margin-bottom:2px}
+.device-art{height:205px;display:flex;align-items:center;justify-content:center;overflow:visible}
+.doodle-keyboard,.doodle-pad{width:100%;max-width:520px;height:205px;overflow:visible}
+.doodle-keyboard path,.doodle-keyboard rect,.doodle-keyboard circle,.doodle-pad path,.doodle-pad circle{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.doodle-keyboard .keys rect{stroke-width:2}.doodle-keyboard .keys .hot{fill:rgba(232,128,26,.22);stroke:#e8801a;stroke-width:3}
+.doodle-keyboard text,.doodle-pad text{fill:var(--red);stroke:none;font:700 15px 'Comic Sans MS','Marker Felt','Segoe Print',sans-serif}
+.doodle-keyboard .leader-lines path,.doodle-pad .leader-lines path{fill:none;stroke:#e8801a;stroke-width:2.5;stroke-dasharray:7 6;opacity:.8}
+.doodle-keyboard .callout text,.doodle-pad .callout text{fill:var(--red);font-size:15px;letter-spacing:.5px}
+.doodle-pad .hot-dot{fill:none;stroke:#e8801a;stroke-width:4}
+.keyboard-device .doodle-keyboard{animation:doodleFloat 3.8s ease-in-out infinite}.pad-device .doodle-pad{animation:doodleFloat 4.2s ease-in-out infinite reverse}
+.control-row{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;font-size:17px;line-height:1.35;margin-top:6px}
+.key-pill{color:#e8801a;border:2px solid #e8801a;border-radius:5px 7px 4px 6px;padding:1px 7px;font-weight:700;background:rgba(232,128,26,.08);transform:rotate(-1deg)}
+.control-footer{display:flex;justify-content:center;gap:12px;align-items:center;flex-wrap:wrap;margin:14px auto 2px;padding-top:10px;border-top:1.5px dashed rgba(26,48,192,.3);font-size:16px;opacity:.65;letter-spacing:1px}
+@keyframes doodleFloat{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-5px) rotate(.6deg)}}
+@media (max-width:900px){.start-controls{grid-template-columns:1fr;gap:8px;max-width:680px}.control-device{padding-top:8px}.device-art{height:170px}.doodle-keyboard,.doodle-pad{height:170px}.control-footer{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.keyboard-device .doodle-keyboard,.pad-device .doodle-pad{animation:none}}
