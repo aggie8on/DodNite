@@ -238,3 +238,11 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 /* compact start screen */
 .settings { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 12px 20px; margin-top: 7px; padding-top: 7px; }
 @media (max-width: 600px) { .mainbtns { flex-wrap: wrap; } .mainbtns:has(.start) { flex-direction: column; } .mainbtns button.start, .mainbtns button.start + button { width: 100%; font-size: 32px; } }
+
+/* room voice */
+.voice-control { position: absolute; right: 4%; top: 16%; z-index: 8; pointer-events: auto; cursor: pointer; font: inherit; font-size: 20px; color: var(--ink); background: rgba(250,248,238,.86); border: 2.5px solid var(--ink); border-radius: 8px 11px 7px 10px; padding: 4px 10px; box-shadow: 3px 3px 0 rgba(26,48,192,.16); transform: rotate(1deg); }
+.voice-control:hover { transform: rotate(1deg) translateY(-1px); }
+.voice-control.on { background: rgba(220,245,220,.92); }
+.voice-control.muted { background: rgba(255,230,220,.92); color: var(--red); }
+#hud.nogame .voice-control { display: none; }
+@media (max-width: 700px) { .voice-control { right: 3%; top: 18%; font-size: 16px; } }
