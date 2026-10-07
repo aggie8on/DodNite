@@ -317,7 +317,7 @@ export class EnemyManager {
     e.hp -= amount; e.flinch = 1; e.flashT = 0.07; if (!e.flashOn) { setFill(e.mat, true); e.flashOn = true; }
     const dir = info.dir || _d.set(0, 1, 0); const amt = clamp(0.5 + amount / 70, 0.5, 2.2) * (e.T.boss ? 1.6 : 1);
     this.ctx.effects.blood(info.point || e.center, dir, amt, { ink: e.T.ink === INK.BLACK ? INK.BLACK : INK.RED });
-    if (info.crit) audio.headshot(e.center); else audio.hitEnemy(e.center);
+    if (info.crit) audio.headshot(e.center); audio.criticalHit(e.center); else audio.hitEnemy(e.center);
     this.ctx.hud.hitmarker(e.hp <= 0, info.crit);
     if (info.source !== 'deflect') this.ctx.input.rumble(0.1, 0.3, 30);
     if (e.state === 'spawn') { e.state = 'hunt'; e.root.scale.setScalar(e.T.scale); }
