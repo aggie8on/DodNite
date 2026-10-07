@@ -405,13 +405,13 @@ function refreshScoreHud() {
   if (!online()) return;
   const rows = sortedScores(); const top = rows.slice(0, 3); const myIdx = rows.findIndex(([id]) => id === net.id);
   if (myIdx >= 3) top.push(rows[myIdx]);
-  hud.setPvpScore(top.map(([id, sc]) => `<div class="row${id === net.id ? ' me' : ''}"><span class="rank">${rows.findIndex(([x]) => x === id) + 1}.</span><span>${esc(sc.name)}${id === net.id ? ' (You)' : ''}</span><b>${sc.kills}</b></div>`).join('') + `<div class="target">First to ${FFA_TARGET} kills</div>`);
+  hud.setPvpScore(top.map(([id, sc]) => `<div class="row${id === net.id ? ' me' : ''}"><span class="rank">${rows.findIndex(([x]) => x === id) + 1}.</span><span>${esc(sc.name)}${id === net.id ? ' (You)' : ''}</span><b>${sc.kills}</b></div>`).join('') + `<div class="target">First to ${FFA_TARGET} points</div>`);
   hud.setModifier('');
   if (!hud.el.board.hidden) hud.setBoard(boardHTML());
 }
 function boardHTML(title = 'Rival Rush') {
   const rows = sortedScores();
-  return `<h3>${title}</h3>${rows.map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}${id === net.id ? ' (You)' : ''}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}<div class="foot">First to ${FFA_TARGET} kills · remaining ${mmss(matchLeft)} · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</div>`;
+  return `<h3>${title}</h3>${rows.map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}${id === net.id ? ' (You)' : ''}</span><span>${s.kills} takedowns · ${s.deaths} falls</span></div>`).join('')}<div class="foot">First to ${FFA_TARGET} points · remaining ${mmss(matchLeft)} · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</div>`;
 }
 function checkWin() {
   if (!net.isHost || !online() || game.over) return;
@@ -422,7 +422,7 @@ function checkWin() {
 function endMatch(winner) {
   game.over = winner; game.overT = 0; game.state = 'over'; endFocus(); input.exitLock(); hud.setBoard(null);
   const title = winner.id === net.id ? 'You' : (winner.name || 'Someone') + ' wins';
-  hud.setGameplayVisible(false); hud.showScreen(`<h1>${title}</h1><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div><div class="go" id="overGo">BackLobby…</div>`);
+  hud.setGameplayVisible(false); hud.showScreen(`<h1>${title}</h1><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}</span><span>${s.kills} takedowns · ${s.deaths} falls</span></div>`).join('')}</div><div class="go" id="overGo">BackLobby…</div>`);
 }
 
 // ---------------- networking ----------------
@@ -638,7 +638,7 @@ function onlineHTML() {
       <div class="row split"><span>or</span></div>
       <div class="row"><button type="button" id="createBtn">Create Room</button><div class="radio"><label><input type="radio" name="vis" value="public" ${lobby.isPublic ? 'checked' : ''} > Open</label><label><input type="radio" name="vis" value="private" ${lobby.isPublic ? '' : 'checked'}> Invite Only</label></div></div>
       <div class="row"><span>Room Code</span><input type="text" id="codeBox" placeholder="Code" maxlength="5" autocomplete="off"><button type="button" id="joinBtn">Enter</button></div>
-      <div class="lobbylist" id="lobbylist"><div class="row"><span>PublicLobby</span><button type="button" class="alt" id="refreshBtn">Refresh</button></div><div class="rows" id="lobbyRows">${lobbyListHTML()}</div></div>
+      <div class="lobbylist" id="lobbylist"><div class="row"><span>Open Rooms</span><button type="button" class="alt" id="refreshBtn">Refresh</button></div><div class="rows" id="lobbyRows">${lobbyListHTML()}</div></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div>
       ${lobby.rejoinCode ? `<div class="row"><button type="button" class="big" id="rejoinBtn">Join ${esc(lobby.rejoinCode)}</button></div>` : ''}
       <div class="row"><button type="button" class="alt" id="backBtn">Back</button></div>
@@ -652,7 +652,7 @@ function lobbyHTML() {
       ${mapHTML(lobby.map || mapKey, host)}
       <div class="hint">${lobby.isPublic ? 'Open room · quick join or room code' : 'Invite-only room · share the code with friends'}</div>
       <div class="plist">${rows.map((p) => `<div class="${p.id === lobby.hostId ? 'host' : ''}${p.id === net.id ? ' me' : ''}"><span>${esc(p.name)}</span><span>${p.id === net.id ? 'You' : ''}</span></div>`).join('')}</div>
-      <div class="row"><button type="button" class="big" id="startBtn">Start Match</button><button type="button" class="alt" id="leaveBtn">Leave</button></div>
+      <div class="row"><button type="button" class="big" id="startBtn">Launch Match</button><button type="button" class="alt" id="leaveBtn">Exit</button></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? 'Join' : n + ' players'}</div>
     </div>`;
 }
@@ -674,7 +674,7 @@ function wireOnline() {
   const q = (id) => box.querySelector('#' + id); wireName(box);
   if (q('quickBtn')) q('quickBtn').addEventListener('click', () => { lockButtons(box); quickPlay(); });
   if (q('createBtn')) q('createBtn').addEventListener('click', () => { lockButtons(box); createLobby(box.querySelector('input[name=vis]:checked').value === 'public'); });
-  if (q('joinBtn')) { q('joinBtn').addEventListener('click', () => { const c = q('codeBox').value.trim().toUpperCase(); if (!c) { setStatus('YouLobbyCode'); return; } lockButtons(box); joinLobby(c); }); q('codeBox').addEventListener('keydown', (e) => { if (e.key === 'Enter') q('joinBtn').click(); }); }
+  if (q('joinBtn')) { q('joinBtn').addEventListener('click', () => { const c = q('codeBox').value.trim().toUpperCase(); if (!c) { setStatus('Enter a room code'); return; } lockButtons(box); joinLobby(c); }); q('codeBox').addEventListener('keydown', (e) => { if (e.key === 'Enter') q('joinBtn').click(); }); }
   if (q('rejoinBtn')) q('rejoinBtn').addEventListener('click', () => { const c = lobby.rejoinCode; lobby.rejoinCode = null; lockButtons(box); joinLobby(c); });
   if (q('backBtn')) q('backBtn').addEventListener('click', () => { lobby.status = ''; lobby.rejoinCode = null; screen = 'main'; showStart(); });
   if (q('refreshBtn')) { q('refreshBtn').addEventListener('click', () => refreshLobbies()); if (!lobbyList && !listBusy) refreshLobbies(); }
@@ -700,7 +700,7 @@ function showStart() {
 }
 function showPause() {
   if (online()) {
-    hud.showScreen(`<h1>Hub</h1><h2>Rival Rush · Room ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Leave</button></div></div><div class="go">Press ${hud.key('confirm')} or click to continue</div>`);
+    hud.showScreen(`<h1>Hub</h1><h2>Rival Rush · Room ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} takedowns · ${s.deaths} falls</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Exit</button></div></div><div class="go">Press ${hud.key('confirm')} or click to continue</div>`);
     wireSettings(); wireOnline(); return;
   }
   hud.showScreen(`<h1>Break</h1><h2>Round ${game.wave} · ${game.score} points</h2>${CONTROLS_HTML}${settingsHTML()}${menuBtnHTML()}<div class="go">Press ${hud.key('confirm')} or click to continue</div>`);
@@ -709,10 +709,10 @@ function showPause() {
 function showClickToPlay() { hud.showScreen(`<h1>Round Live</h1><h2>First to ${FFA_TARGET} points</h2><div class="go">Press ${hud.key('confirm')} or click to begin</div>`); }
 function showDead() {
   hud.setGameplayVisible(false); const nb = game.score > best; if (nb) { best = game.score; localStorage.setItem('doodle_best', String(best)); }
-  hud.showScreen(`<h1>waserased</h1><div class="stats">Round <b>${game.wave}</b> · <b>${game.kills}</b> takedowns · <b>${game.score}</b> points${nb ? ' · <b>New Best</b>' : ` · Best Run ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Press ${hud.key('confirm')} or click to run again</div>`);
+  hud.showScreen(`<h1>RUN ENDED</h1><div class="stats">Round <b>${game.wave}</b> · <b>${game.kills}</b> takedowns · <b>${game.score}</b> points${nb ? ' · <b>New Best</b>' : ` · Best Run ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Press ${hud.key('confirm')} or click to run again</div>`);
   wireCheckpoints((w) => beginAtWave(w)); wireMenuBtn();
 }
-function menuBtnHTML() { return '<div class="online menubtn"><div class="row"><button type="button" class="alt" id="menuBtn">Menu</button></div></div>'; }
+function menuBtnHTML() { return '<div class="online menubtn"><div class="row"><button type="button" class="alt" id="menuBtn">Hub</button></div></div>'; }
 function wireMenuBtn() { const b = hud.el.panel.querySelector('#menuBtn'); if (b) b.addEventListener('click', (e) => { e.stopPropagation(); toMainMenu(); }); }
 function toMainMenu() { game.state = 'start'; game.mode = 'solo'; game.menu = false; setArena(false); resetGame(); audio.reelLoop(false); input.exitLock(); hud.setGameplayVisible(false); screen = 'main'; showStart(); }
 function toLobbyScreen() { net.inMatch = false; for (const r of remote.values()) r.lastSeen = performance.now(); setArena(true); resetGame(); game.state = 'lobby'; game.over = null; game.menu = false; hud.setGameplayVisible(false); hud.setBoard(null); screen = 'lobby'; showStart(); }
