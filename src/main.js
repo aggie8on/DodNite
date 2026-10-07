@@ -58,7 +58,14 @@ const game = ctx.game = {
   state: 'start', mode: 'solo', menu: false, time: 0, hitstopT: 0, hitstopScale: 1, wave: 0, score: 0, combo: 0, comboT: 0, kills: 0, intermission: 0, queue: [], spawnT: 0, maxAlive: 6, deathT: 0,
   focus: { active: false, t: 0, chain: 0, target: null, dash: null, arm: 0, ready: false }, katanaStreak: 0, boss: null, respawnT: 0, matchT: 0, over: null, overT: 0,
   hitstop(d, s) { this.hitstopT = Math.max(this.hitstopT, d); this.hitstopScale = s; },
-  addScore(pts, label) { const mult = 1 + Math.min(this.combo, 9) * 0.25; const p = Math.round(pts * mult); this.score += p; if (label) hud.kill(label, p); hud.setScore(this.score, this.combo); },
+  addScore(pts, label) {
+    const mult = 1 + Math.min(this.combo, 9) * 0.25;
+    const p = Math.round(pts * mult);
+    this.score += p;
+    if (label) hud.kill(label, p);
+    if (this.combo >= 3) audio.combo(this.combo);
+    hud.setScore(this.score, this.combo);
+  },
   onPlayerDeath() { endFocus(); onLocalDeath(); },
 };
 const online = () => game.mode === 'ffa';
@@ -115,7 +122,7 @@ ctx.hitPlayer = (t, dmg, info) => {
   const frontHit = /^(head|torso|arm|fore)/.test(info.part || '');
   // a slash is only parried by a guard that just came up and faces you
   if (facing > 0.6 && frontHit && info.source === 'katana' && t.parryWindow) { effects.strokeBurst(info.point, INK.ORANGE, 10, 6, { life: 0.25, size: 0.04 }); audio.shieldHit(t.center); game.hitstop(0.08, 0.15); player.weapons[player.katanaIndex].cooldown = Math.max(player.weapons[player.katanaIndex].cooldown, 0.6); input.rumble(0.6, 0.3, 90); hud.tip('wasBlock', 0.9); return; }
-  effects.blood(info.point, info.dir, clamp(0.4 + dmg / 80, 0.4, 1.6), { ink: INK.RED }); hud.hitmarker(false, info.crit); audio.hitEnemy(t.center); t.flash();
+  effects.blood(info.point, info.dir, clamp(0.4 + dmg / 80, 0.4, 1.6), { ink: INK.RED }); hud.hitmarker(false, info.crit); audio.hitEnemy(t.center); if (info.crit) audio.criticalHit(t.center); t.flash();
   net.sendTo(t.id, 'pdmg', { amount: Math.round(dmg), from: player.center.toArray().map((v) => +v.toFixed(1)), by: net.id, crit: !!info.crit, src: info.source });
 };
 // a slash through another player's rope cuts it: their client drops the hook
