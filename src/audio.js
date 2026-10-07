@@ -202,8 +202,32 @@ class Sfx {
   get musicPlaying() { return !!this._mus; }
   setIntensity(v) { this._intensity = clamp(v, 0, 1); }
   setTune(key) { if (this._tuneKey === key) return; this._tuneKey = key; if (this._mus) { this._mus.step = 0; this._mus.next = this.ctx.currentTime + 0.1; } }
+  _dodniteTick() {
+    const ctx = this.ctx, m = this._mus; if (!m) return;
+    const I = this._intensity || 0, out = this.musicGain;
+    const bpm = 112, step = 60 / bpm / 2, midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
+    const chords = [[50, 53, 57], [46, 50, 53], [53, 57, 60], [48, 52, 55]];
+    if (m.next < ctx.currentTime - 0.8) m.next = ctx.currentTime + 0.05;
+    while (m.next < ctx.currentTime + 0.7) {
+      const t = m.next, s = m.step % 32, bar = Math.floor(s / 8), beat = s % 8, chord = chords[bar % 4];
+      // dark sustained chord bed: wide, quiet, no bright arcade lead
+      if (beat === 0) {
+        chord.forEach((n, j) => this.tone({ freq: midi(n + (j === 0 ? 0 : 12)), dur: step * 7.7, gain: 0.025 + I * 0.012, type: j === 0 ? 'sawtooth' : 'triangle', at: t, out }));
+        this.tone({ freq: midi(chord[0] - 12), dur: step * 7.5, gain: 0.09, type: 'sine', at: t, out });
+      }
+      // restrained pulse: the soundtrack breathes instead of constantly filling the spectrum
+      if (beat === 0 || beat === 4) this.tone({ freq: midi(chord[0] - 24), freqEnd: midi(chord[0] - 29), dur: 0.24, gain: 0.16 + I * 0.08, type: 'sine', at: t, out });
+      if (I > 0.18 && (beat === 2 || beat === 6)) this._noiseAt(t, 0.055, 0.035 + I * 0.035, 'bandpass', 1800, out);
+      if (I > 0.45 && beat % 2 === 0) this._noiseAt(t, 0.018, 0.018, 'highpass', 7000, out);
+      // occasional tension note, not a constant melody
+      if (beat === 6 && bar % 2 === 1) this.tone({ freq: midi(chord[1] + 12), dur: 0.18, gain: 0.045 + I * 0.025, type: 'sine', at: t, out });
+      m.next += step; m.step++;
+    }
+  }
+
   _musicTick() {
     if (this._tuneKey === 'mexico') return this._mariachiTick();
+    return this._dodniteTick();
     const ctx = this.ctx, m = this._mus; if (!m) return; const I = this._intensity || 0; const out = this.musicGain;
     const bpm = 156, step = 60 / bpm / 4; const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
     // a throttled tab can fall far behind; skip forward rather than replaying every missed note
