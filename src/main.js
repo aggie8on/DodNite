@@ -256,7 +256,7 @@ function startWave(n) {
   const pool = ROSTER.filter((r) => n >= r.from).map((r) => ({ t: r.t, w: r.w * Math.min(1, 0.3 + 0.25 * (n - r.from)) }));
   const total = pool.reduce((a, r) => a + r.w, 0);
   for (let i = 0; i < count; i++) { let r = Math.random() * total, t = pool[0].t; for (const c of pool) { r -= c.w; if (r <= 0) { t = c.t; break; } } game.queue.push(t); }
-  if (boss) { hud.message('Wave  ' + n + '  waves', enemyName(bossFor(n)) + ' Incoming', 3); audio.bossRoar(player.center); }
+  if (boss) { hud.message('Round  ' + n, enemyName(bossFor(n)) + ' Incoming', 3); audio.bossRoar(player.center); }
   else hud.message('Wave  ' + n + '  waves', n === 1 ? 'They are crawling onto the page' : mod.name || choose(['Use', 'Keep doodling', 'Stay off the ground', 'Use the blade', 'Reflect the bullets']), 2.6);
   audio.wave();
   if (n <= tips().length) hud.tip(tips()[n - 1], 7);
