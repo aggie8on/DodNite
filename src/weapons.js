@@ -72,7 +72,7 @@ const GUNS = {
 export class Gun extends ViewModel {
   constructor(ctx, type) {
     super(ctx); Object.assign(this, GUNS[type]); this.isGun = true; this.mag = this.magSize;
-    this.fireT = 0; this.reloading = false; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
+    this.fireT = 0; this.reloading = false; this.burstRemaining = 0; this.reloadT = 0; this.spreadCur = this.spread; this.flashT = 0; this.pumpT = 0; this.racked = false; this.needPump = false;
     this.mat = makeInkMaterial({ ink: INK.BLUE }); this.dark = makeInkMaterial({ ink: INK.BLACK }); this.red = makeInkMaterial({ ink: INK.RED, fill: true });
     this.build(); this.setSight(...this.sight);
   }
@@ -122,10 +122,14 @@ export class Gun extends ViewModel {
       if (this.reloadT >= this.reloadDur) { this.mag++; this.reserve--; this.reloadT = 0; if (this.mag >= this.magSize || this.reserve <= 0) { this.reloading = false; if (this.handL) this.handL.position.copy(this.handLPos); if (this.needPump) this.pumpT = this.cycleDur; } else audio.shell(); }
     }
     if (st.reloadPressed && this.mag < this.magSize && this.reserve > 0 && !this.reloading && this.pumpT <= 0) { this.startReload(); return; }
-    const wantFire = this.auto ? st.fire : st.firePressed;
+    let wantFire = this.auto ? st.fire : st.firePressed;
+    if (this.burst) {
+      if (st.firePressed && this.burstRemaining <= 0) this.burstRemaining = Math.min(3, this.mag);
+      wantFire = this.burstRemaining > 0;
+    }
     if (wantFire && this.fireT <= 0 && this.pumpT <= 0 && !st.blockFire) {
       if (this.mag <= 0) { if (st.firePressed) { audio.empty(); this.startReload(); } }
-      else { if (this.reloading) { this.reloading = false; if (this.handL) this.handL.position.copy(this.handLPos); } this.fire(st); }
+      else { if (this.reloading) { this.reloading = false; if (this.handL) this.handL.position.copy(this.handLPos); } this.fire(st); if (this.burst && this.burstRemaining > 0) this.burstRemaining--; }
     }
   }
   fire(st) {
@@ -190,6 +194,43 @@ export class Rifle extends Gun {
     this.flash = makeFlash(g, 0, 0.02, -0.98, 1);
   }
 }
+export class BurstRifle extends Rifle {
+  constructor(ctx) {
+    super(ctx);
+    Object.assign(this, {
+      name: 'Burst Rifle',
+      hint: 'Three-round burst · controlled mid-range fire',
+      kind: 'burst',
+      magSize: 30,
+      reserve: 150,
+      maxReserve: 300,
+      interval: 0.075,
+      damage: 29,
+      headMul: 2.5,
+      spread: 0.014,
+      adsSpread: 0.0028,
+      spreadKick: 0.006,
+      spreadMax: 0.06,
+      adsFov: 54,
+      camKick: [0.014, 0.004],
+      modelKick: [0.22, 0.34, 2.7, -4.2, 0.9, 1.4],
+      fovKick: 1.5,
+      reloadDur: 1.5,
+      reloadType: 'mag',
+      auto: false,
+      falloff: null,
+      tracer: 0.022,
+      flashScale: 1.05,
+      sound: 'burstFire',
+      shell: [0.02, INK.ORANGE],
+      moveSpread: 0.001,
+      pvp: [22, 2.1, null],
+      burst: true
+    });
+    this.setSight(...this.sight);
+  }
+}
+
 export class Shotgun extends Gun {
   constructor(ctx) { super(ctx, 'shotgun'); this.basePos.set(0.2, -0.19, -0.34); }
   build() {
@@ -218,6 +259,44 @@ export class Revolver extends Gun {
     this.muzzle = new THREE.Object3D(); this.muzzle.position.set(0, 0.035, -0.4); g.add(this.muzzle);
     this.ejectPt = new THREE.Object3D(); this.ejectPt.position.set(-0.05, 0.02, 0); g.add(this.ejectPt);
     this.flash = makeFlash(g, 0, 0.035, -0.4, 1);
+  }
+}
+
+export class M107 extends Sniper {
+  constructor(ctx) {
+    super(ctx);
+    Object.assign(this, {
+      name: 'M107 Heavy Sniper',
+      hint: 'Extreme zoom · instant-hit precision',
+      kind: 'm107',
+      magSize: 4,
+      reserve: 20,
+      maxReserve: 40,
+      interval: 0.3,
+      damage: 240,
+      headMul: 2.8,
+      spread: 0.06,
+      adsSpread: 0.00012,
+      spreadKick: 0.075,
+      spreadMax: 0.12,
+      adsFov: 10,
+      camKick: [0.09, 0.012],
+      modelKick: [0.5, 1.1, 6.5, -15, 1.8, 3.5],
+      fovKick: 6,
+      reloadDur: 2.5,
+      reloadType: 'mag',
+      auto: false,
+      falloff: null,
+      tracer: 0.04,
+      flashScale: 2.1,
+      sound: 'm107Fire',
+      shell: [0.035, INK.ORANGE],
+      moveSpread: 0.003,
+      cycleDur: 1.05,
+      pvp: [210, 2.4, null]
+    });
+    this.basePos.set(0.23, -0.2, -0.39);
+    this.setSight(...this.sight);
   }
 }
 
