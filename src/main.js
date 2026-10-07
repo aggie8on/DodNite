@@ -74,7 +74,15 @@ const enemies = ctx.enemies = new EnemyManager(ctx);
 const player = ctx.player = new Player(ctx);
 player.name = myName;
 const net = new Net();
-const voice = new VoiceChat(net, (state) => hud.setVoice(state.enabled, state.muted, state.peers));
+const voice = new VoiceChat(net, (state) => {
+  hud.setVoice(state.enabled, state.muted, state.peers);
+  const b = hud.el.panel?.querySelector('#roomVoiceBtn');
+  if (b) {
+    b.textContent = state.enabled ? (state.muted ? '🔇 Voice Muted' : \`🎙 Voice On\${state.peers ? ' · ' + state.peers : ''}\`) : '🎙 Enable Voice';
+    b.classList.toggle('on', state.enabled && !state.muted);
+    b.classList.toggle('muted', state.muted);
+  }
+});
 const remote = new Map();      // peer id -> RemotePlayer
 const lobby = { players: new Map(), hostId: null, isPublic: true, status: '', code: '', map: null };
 const scores = new Map();      // peer id -> { name, kills, deaths }
@@ -661,6 +669,7 @@ function lobbyHTML() {
       ${mapHTML(lobby.map || mapKey, host)}
       <div class="hint">${lobby.isPublic ? 'Open room · quick join or room code' : 'Invite-only room · share the code with friends'}</div>
       <div class="plist">${rows.map((p) => `<div class="${p.id === lobby.hostId ? 'host' : ''}${p.id === net.id ? ' me' : ''}"><span>${esc(p.name)}</span><span>${p.id === net.id ? 'You' : ''}</span></div>`).join('')}</div>
+      <div class="voice-room"><button type="button" id="roomVoiceBtn" class="voice-room-btn">🎙 Enable Voice</button><span>Talk to everyone in this room</span></div>
       <div class="row"><button type="button" class="big" id="startBtn">Launch Match</button><button type="button" class="alt" id="leaveBtn">Exit</button></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? 'Join' : n + ' players'}</div>
     </div>`;
@@ -689,6 +698,11 @@ function wireOnline() {
   if (q('refreshBtn')) { q('refreshBtn').addEventListener('click', () => refreshLobbies()); if (!lobbyList && !listBusy) refreshLobbies(); }
   if (q('lobbyRows')) q('lobbyRows').addEventListener('click', (e) => { const b = e.target.closest('button[data-join]'); if (b) { lockButtons(box); joinLobby(b.dataset.join); } });
   wireMap((k) => { if (net.isHost) { lobby.map = k; broadcastLobby(); } });
+  if (q('roomVoiceBtn')) q('roomVoiceBtn').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    try { await voice.toggle(); }
+    catch (err) { setStatus(err && err.message ? err.message : 'Microphone unavailable'); }
+  });
   if (q('startBtn')) q('startBtn').addEventListener('click', () => { if (net.isHost) hostStart(); else { net.send('startreq', {}); setStatus('Waiting for host…'); } });
   if (q('leaveBtn')) q('leaveBtn').addEventListener('click', () => { lobby.rejoinCode = null; leaveOnline(''); });
 }
