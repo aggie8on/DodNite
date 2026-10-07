@@ -11,6 +11,7 @@ export class HUD {
       <div class="hitmarker" id="hitmarker"><i></i><i></i></div>
       <div class="dmg-ind" id="dmg"></div>
       <div class="hud-tl"><div class="score">POINTS <b id="score">0</b></div><div class="combo" id="combo"></div></div>
+      <button class="voice-control" id="voiceControl" type="button" title="Room voice chat">🎙 Voice Off</button>
       <div class="hud-tr"><div class="wave">ROUND <b id="wave">1</b></div><div class="modifier" id="modifier"></div><div class="left"><b id="left">0</b>  THREATS</div><div class="timer" id="timer"></div><div class="pvpscore" id="pvpscore" hidden></div></div><div class="board" id="board" hidden></div>
       <div class="bossbar" id="bossbar"><div class="bossname" id="bossname"></div><div class="bar big"><div class="fill red" id="bossfill"></div></div></div>
       <div class="hud-bl">
@@ -24,7 +25,7 @@ export class HUD {
       <div class="killfeed" id="killfeed"></div>
       <div class="screen" id="screen"><div class="panel" id="panel"></div></div>`;
     const q = (id) => root.querySelector('#' + id);
-    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill') };
+    this.el = { crosshair: q('crosshair'), gret: q('gret'), hitmarker: q('hitmarker'), dmg: q('dmg'), score: q('score'), combo: q('combo'), wave: q('wave'), modifier: q('modifier'), left: q('left'), timer: q('timer'), hpfill: q('hpfill'), hpnum: q('hpnum'), mag: q('mag'), reserve: q('reserve'), reloading: q('reloading'), tally: q('tally'), weapon: q('weapon'), hint: q('hint'), slots: q('slots'), tip: q('tip'), msg: q('msg'), msgsub: q('msgsub'), killfeed: q('killfeed'), screen: q('screen'), panel: q('panel'), nades: q('nades'), scope: q('scope'), focusmark: q('focusmark'), focusmeter: q('focusmeter'), fmfill: q('fmfill'), bossbar: q('bossbar'), bossname: q('bossname'), bossfill: q('bossfill'), pvpscore: q('pvpscore'), board: q('board'), gstam: q('gstam'), gstamfill: q('gstamfill'), voice: q('voiceControl') };
     this._msgT = 0; this._scope = false; this._nades = -1; this._pad = false; this.onDevice = null; this._fmShow = false; this._fmFrac = -1; this._fmReady = false; this._lastTally = -1; this._lastSlots = ''; this._ads = false; this._mode = ''; this.onScreenClick = null; this._tipT = 0;
     this.el.screen.addEventListener('click', () => { if (this.onScreenClick) this.onScreenClick(); });
   }
@@ -37,6 +38,12 @@ export class HUD {
     const f = Math.max(0, Math.min(1, frac));
     if (Math.abs(f - (this._fmFrac ?? -1)) > 0.005) { this._fmFrac = f; this.el.fmfill.style.height = (f * 100).toFixed(1) + '%'; }
     if (ready !== this._fmReady) { this._fmReady = ready; m.classList.toggle('ready', ready); }
+  }
+  setVoice(enabled, muted, peers = 0) {
+    if (!this.el.voice) return;
+    this.el.voice.className = 'voice-control' + (enabled ? ' on' : '') + (muted ? ' muted' : '');
+    this.el.voice.textContent = enabled ? (muted ? '🔇 Muted' : `🎙 Voice${peers > 0 ? ' · ' + peers : ''}`) : '🎙 Voice Off';
+    this.el.voice.title = enabled ? (muted ? 'Unmute room voice' : 'Mute room voice') : 'Join room voice chat';
   }
   setGrenades(n) { if (n === this._nades) return; this._nades = n; let h = ''; for (let i = 0; i < n; i++) h += '<i></i>'; this.el.nades.innerHTML = h; }
   // control labels follow whatever you touched last
