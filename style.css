@@ -234,3 +234,7 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 @media (max-height:820px) and (min-width:901px){.panel{padding:14px 24px}.panel h1{font-size:68px}.panel h2{font-size:28px;margin:2px 0 8px}.start-controls{margin:6px auto 4px;gap:20px}.device-title{font-size:15px}.device-art{height:145px}.real-illustration{height:145px}.control-labels{font-size:13px;gap:4px}.control-footer{margin:7px auto 0;padding-top:6px;font-size:12px}}
 @media (max-height:680px) and (min-width:901px){.panel h1{font-size:54px}.panel h2{font-size:22px}.device-art{height:115px}.real-illustration{height:115px}.control-labels{font-size:11px}.key-pill{padding:0 5px}.control-footer{font-size:10px;margin-top:4px;padding-top:4px}}
 @media (prefers-reduced-motion:reduce){.real-illustration{animation:none}}
+
+/* compact start screen */
+.settings { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 12px 20px; margin-top: 7px; padding-top: 7px; }
+@media (max-width: 600px) { .mainbtns { flex-wrap: wrap; } .mainbtns:has(.start) { flex-direction: column; } .mainbtns button.start, .mainbtns button.start + button { width: 100%; font-size: 32px; } }
