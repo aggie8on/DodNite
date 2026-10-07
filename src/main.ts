@@ -112,7 +112,7 @@ function spawn(kind?: Enemy['kind']) {
   head.position.y=k==='tank'?2.95:2.55; g.add(head); head.add(outline(head.geometry));
   const a=Math.random()*Math.PI*2,r=28+Math.random()*40;
   g.position.set(Math.cos(a)*r,0,Math.sin(a)*r); world.add(g);
-  enemies.push({m:g,hp:k==='tank'?10:k==='runner'?2:3,speed:k==='tank'?1.55:k==='runner'?4.1:2.35});
+  enemies.push({m:g,hp:k==='tank'?10:k==='runner'?2:3,speed:k==='tank'?1.55:k==='runner'?4.1:2.35,kind:k});
 }
 function startWave() {
   for(let i=0;i<4+wave*2;i++) spawn();
