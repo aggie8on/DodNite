@@ -1,24 +1,21 @@
-<!doctype html>
-<html>
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>DodNite</title></head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>涂鸦街区</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+</head>
 <body>
-<div id="hud">
-  <div class="top">
-    <span>WAVE <b id="wave">1</b></span>
-    <span>SCORE <b id="score">0</b></span>
-    <span>HP <b id="hp">100</b></span><span>LEVEL <b>01</b></span>
-  </div>
-  <div id="crosshair">+</div>
-  <div id="objective">SURVIVE</div><div id="message"></div><div id="complete"><div class="completeTitle">LEVEL COMPLETE</div><div>ABANDONED CITY CLEARED</div><button id="next">NEXT LEVEL</button></div>
-  <div id="weaponBox"><div id="weapon">RIFLE</div><div id="ammo">READY</div></div>
-  <div id="hint">WASD MOVE · SHIFT SPRINT · SPACE DOUBLE JUMP · C SLIDE · F AIR DASH · 1–5 WEAPONS · LMB FIRE · ESC UNLOCK</div>
-</div>
-<div id="start">
-  <h1>DODNITE</h1>
-  <p>Abandoned city. Endless waves.</p>
-  <div class="sub">ABANDONED CITY · DOODLE COMBAT · SURVIVE</div>
-  <button id="play">PLAY</button>
-</div>
-<script type="module" src="/src/main.ts"></script>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<script src="./vendor/peerjs/peerjs.min.js"></script>
+<script type="module" src="./src/main.js"></script>
 </body>
 </html>
