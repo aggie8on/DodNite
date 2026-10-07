@@ -16,7 +16,14 @@ export const makeCode = () => Array.from({ length: 5 }, () => ALPHABET[Math.floo
 const PEER_OPTS = { host: '0.peerjs.com', port: 443, secure: true, path: '/', debug: 1, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] } };
 const JOIN_TIMEOUT = 18000, QUICK_TIMEOUT = 14000, SIGNAL_TIMEOUT = 20000;
 
-function peerAvailable() { return typeof window !== 'undefined' && typeof window.Peer === 'function'; }
+async function waitForPeer() {
+  if (typeof window === 'undefined') throw new Error('PeerJS requires a browser');
+  if (typeof window.Peer === 'function') return;
+  if (window.__dodnitePeerReady) {
+    try { await window.__dodnitePeerReady; } catch (e) { throw new Error(e && e.message ? e.message : 'PeerJS client failed to load'); }
+  }
+  if (typeof window.Peer !== 'function') throw new Error('PeerJS client is unavailable');
+}
 const idFromError = (err) => { const m = /peer\s+(\S+)/.exec(String(err && err.message || '')); return m ? m[1] : null; };
 
 export class Net {
@@ -32,11 +39,12 @@ export class Net {
 
   _newPeer(id) {
     return new Promise((resolve, reject) => {
-      if (!peerAvailable()) return reject(new Error('networking library did not load'));
-      const peer = new window.Peer(id, PEER_OPTS); let settled = false;
+      waitForPeer().then(() => {
+        const peer = new window.Peer(id, PEER_OPTS); let settled = false;
       const timer = setTimeout(() => { if (!settled) { settled = true; peer.destroy(); reject(new Error('signalling server timed out')); } }, SIGNAL_TIMEOUT);
-      peer.on('open', () => { if (settled) return; settled = true; clearTimeout(timer); resolve(peer); });
-      peer.on('error', (err) => { if (settled) return; settled = true; clearTimeout(timer); peer.destroy(); reject(err); });
+        peer.on('open', () => { if (settled) return; settled = true; clearTimeout(timer); resolve(peer); });
+        peer.on('error', (err) => { if (settled) return; settled = true; clearTimeout(timer); peer.destroy(); reject(err); });
+      }).catch(reject);
     });
   }
   _wire(conn) {
