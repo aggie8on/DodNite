@@ -14,6 +14,7 @@ import { RemotePlayer, encodeLocal } from './players.js';
 import { Net } from './net.js';
 import { HUD, START_CONTROLS_HTML, CONTROLS_HTML } from './hud.js';
 import { audio } from './audio.js';
+import { VoiceChat } from './voice.js';
 import { rand, choose, clamp } from './util.js';
 
 const canvas = document.getElementById('c');
@@ -73,6 +74,7 @@ const enemies = ctx.enemies = new EnemyManager(ctx);
 const player = ctx.player = new Player(ctx);
 player.name = myName;
 const net = new Net();
+const voice = new VoiceChat(net, (state) => hud.setVoice(state.enabled, state.muted, state.peers));
 const remote = new Map();      // peer id -> RemotePlayer
 const lobby = { players: new Map(), hostId: null, isPublic: true, status: '', code: '', map: null };
 const scores = new Map();      // peer id -> { name, kills, deaths }
@@ -566,7 +568,7 @@ function netUpdate(dt) {
   if (net.isHost && clockOn) { game.matchT += dt; if (matchLeft <= 0) { const rows = sortedScores(); const w = rows.length ? { id: rows[0][0], name: rows[0][1].name } : { id: net.id, name: myName }; net.send('end', w); endMatch(w); } }
 }
 function leaveOnline(reason) {
-  net.leave(); for (const id of [...remote.keys()]) removeRemote(id); lobby.players.clear(); scores.clear(); hud.setBoard(null);
+  voice.stop(); net.leave(); for (const id of [...remote.keys()]) removeRemote(id); lobby.players.clear(); scores.clear(); hud.setBoard(null);
   if (game.state !== 'start') { game.state = 'start'; game.mode = 'solo'; setArena(false); resetGame(); hud.setGameplayVisible(false); }
   game.menu = false; lobby.status = reason || ''; screen = 'online'; showStart();
 }
@@ -768,10 +770,17 @@ hud.onScreenClick = () => {
 canvas.addEventListener('click', () => { if (game.state === 'play' && !game.menu && !input.pointerLocked && !input.usingGamepad) input.requestLock(); });
 input.onLockChange = (locked) => { if (!locked && (game.state === 'play' || (game.state === 'dying' && online())) && !game.menu && !input.usingGamepad) pause(); };
 input.onDeviceChange = (pad) => { hud.setDevice(pad); hud.setWeapon(player.weapon.name, player.weapon.hint); };
-window.addEventListener('pagehide', () => { if (net.active) net.leave(); });
+window.addEventListener('pagehide', () => { voice.stop(); if (net.active) net.leave(); });
 // browsers only let audio start on a gesture; any press wakes the context if it went to sleep
 for (const ev of ['pointerdown', 'keydown']) window.addEventListener(ev, () => { audio.init(); audio.resume(); }, { passive: true });
-hud.setDevice(input.usingGamepad); applySettings(); hud.setWeapon(player.weapon.name, player.weapon.hint); showStart();
+hud.setDevice(input.usingGamepad); applySettings(); hud.setWeapon(player.weapon.name, player.weapon.hint); hud.setVoice(false, false, 0);
+hud.el.voice.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  if (!net.active) return;
+  try { await voice.toggle(); }
+  catch (err) { hud.tip(esc(err && err.message || 'Microphone unavailable'), 3); }
+});
+showStart();
 
 // ---------------- loop ----------------
 let last = performance.now(), boardToggle = false, lockTipT = 0.5, musicHealT = 2;
