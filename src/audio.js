@@ -58,8 +58,8 @@ class Sfx {
   }
   // another player's gun, heard from where they stand: a bit hotter than a bot's so it cuts through
   remoteShot(kind, pos) {
-    if (kind === 'm107') { this.m107Fire(); }
-    else if (kind === 'burst') { this.burstFire(); }
+    if (kind === 'm107') { this.m107Fire(pos); }
+    else if (kind === 'burst') { this.burstFire(pos); }
     else if (kind === 'shotgun') { this.noise({ dur: 0.32, gain: 1.0, type: 'lowpass', freq: 1600, freqEnd: 150, pos }); this.tone({ freq: 95, freqEnd: 30, dur: 0.26, gain: 0.7, type: 'triangle', pos }); }
     else if (kind === 'sniper') { this.noise({ dur: 0.4, gain: 1.0, type: 'bandpass', freq: 750, freqEnd: 120, q: 0.5, pos }); this.tone({ freq: 420, freqEnd: 50, dur: 0.32, gain: 0.5, type: 'sawtooth', pos }); }
     else { this.noise({ dur: 0.16, gain: 0.85, type: 'bandpass', freq: rand(1000, 1500), freqEnd: 220, q: 0.8, pos }); this.noise({ dur: 0.05, gain: 0.4, type: 'highpass', freq: 2600, pos }); this.tone({ freq: 200, freqEnd: 50, dur: 0.12, gain: 0.45, type: 'square', pos }); }
@@ -77,16 +77,16 @@ class Sfx {
     this.tone({ freq: 400, freqEnd: 50, dur: 0.3, gain: 0.35, type: 'sawtooth', pos });
   }
   sniperAim(pos) { this.tone({ freq: 1800, dur: 0.12, gain: 0.12, type: 'sine', pos }); }
-  burstFire() {
-    this.noise({ dur: 0.13, gain: 0.62, type: 'bandpass', freq: 1500, freqEnd: 280, q: 0.75 });
-    this.noise({ dur: 0.045, gain: 0.36, type: 'highpass', freq: 3200 });
-    this.tone({ freq: 190, freqEnd: 48, dur: 0.12, gain: 0.42, type: 'triangle' });
+  burstFire(pos = null) {
+    this.noise({ dur: 0.13, gain: 0.62, type: 'bandpass', freq: 1500, freqEnd: 280, q: 0.75, pos });
+    this.noise({ dur: 0.045, gain: 0.36, type: 'highpass', freq: 3200, pos });
+    this.tone({ freq: 190, freqEnd: 48, dur: 0.12, gain: 0.42, type: 'triangle', pos });
   }
-  m107Fire() {
-    this.noise({ dur: 0.52, gain: 1.05, type: 'bandpass', freq: 1050, freqEnd: 70, q: 0.45 });
-    this.noise({ dur: 0.085, gain: 0.82, type: 'highpass', freq: 3200 });
-    this.tone({ freq: 115, freqEnd: 28, dur: 0.5, gain: 0.95, type: 'sawtooth' });
-    this.tone({ freq: 1450, freqEnd: 260, dur: 0.55, gain: 0.2, type: 'sine', delay: 0.04 });
+  m107Fire(pos = null) {
+    this.noise({ dur: 0.52, gain: 1.05, type: 'bandpass', freq: 1050, freqEnd: 70, q: 0.45, pos });
+    this.noise({ dur: 0.085, gain: 0.82, type: 'highpass', freq: 3200, pos });
+    this.tone({ freq: 115, freqEnd: 28, dur: 0.5, gain: 0.95, type: 'sawtooth', pos });
+    this.tone({ freq: 1450, freqEnd: 260, dur: 0.55, gain: 0.2, type: 'sine', delay: 0.04, pos });
   }
   empty() { this.noise({ dur: 0.03, gain: 0.3, type: 'highpass', freq: 3000 }); }
   winded() { this.tone({ freq: 220, freqEnd: 140, dur: 0.14, gain: 0.1, type: 'triangle' }); }
