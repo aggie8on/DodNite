@@ -138,6 +138,8 @@ const hud = {
   weapon:document.querySelector('#weapon') as HTMLElement,
   ammo:document.querySelector('#ammo') as HTMLElement,
   message:document.querySelector('#message') as HTMLElement,
+  objective:document.querySelector('#objective') as HTMLElement,
+  complete:document.querySelector('#complete') as HTMLElement,
   start:document.querySelector('#start') as HTMLElement
 };
 
@@ -330,6 +332,7 @@ document.addEventListener('mousemove',e=>{
   pitch=Math.max(-1.42,Math.min(1.42,pitch));
 });
 document.querySelector('#play')!.addEventListener('click',()=>renderer.domElement.requestPointerLock());
+document.querySelector('#next')!.addEventListener('click',()=>location.reload());
 
 startWave(); updateHud();
 
