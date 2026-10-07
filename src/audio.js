@@ -58,7 +58,9 @@ class Sfx {
   }
   // another player's gun, heard from where they stand: a bit hotter than a bot's so it cuts through
   remoteShot(kind, pos) {
-    if (kind === 'shotgun') { this.noise({ dur: 0.32, gain: 1.0, type: 'lowpass', freq: 1600, freqEnd: 150, pos }); this.tone({ freq: 95, freqEnd: 30, dur: 0.26, gain: 0.7, type: 'triangle', pos }); }
+    if (kind === 'm107') { this.m107Fire(); }
+    else if (kind === 'burst') { this.burstFire(); }
+    else if (kind === 'shotgun') { this.noise({ dur: 0.32, gain: 1.0, type: 'lowpass', freq: 1600, freqEnd: 150, pos }); this.tone({ freq: 95, freqEnd: 30, dur: 0.26, gain: 0.7, type: 'triangle', pos }); }
     else if (kind === 'sniper') { this.noise({ dur: 0.4, gain: 1.0, type: 'bandpass', freq: 750, freqEnd: 120, q: 0.5, pos }); this.tone({ freq: 420, freqEnd: 50, dur: 0.32, gain: 0.5, type: 'sawtooth', pos }); }
     else { this.noise({ dur: 0.16, gain: 0.85, type: 'bandpass', freq: rand(1000, 1500), freqEnd: 220, q: 0.8, pos }); this.noise({ dur: 0.05, gain: 0.4, type: 'highpass', freq: 2600, pos }); this.tone({ freq: 200, freqEnd: 50, dur: 0.12, gain: 0.45, type: 'square', pos }); }
   }
@@ -75,6 +77,17 @@ class Sfx {
     this.tone({ freq: 400, freqEnd: 50, dur: 0.3, gain: 0.35, type: 'sawtooth', pos });
   }
   sniperAim(pos) { this.tone({ freq: 1800, dur: 0.12, gain: 0.12, type: 'sine', pos }); }
+  burstFire() {
+    this.noise({ dur: 0.13, gain: 0.62, type: 'bandpass', freq: 1500, freqEnd: 280, q: 0.75 });
+    this.noise({ dur: 0.045, gain: 0.36, type: 'highpass', freq: 3200 });
+    this.tone({ freq: 190, freqEnd: 48, dur: 0.12, gain: 0.42, type: 'triangle' });
+  }
+  m107Fire() {
+    this.noise({ dur: 0.52, gain: 1.05, type: 'bandpass', freq: 1050, freqEnd: 70, q: 0.45 });
+    this.noise({ dur: 0.085, gain: 0.82, type: 'highpass', freq: 3200 });
+    this.tone({ freq: 115, freqEnd: 28, dur: 0.5, gain: 0.95, type: 'sawtooth' });
+    this.tone({ freq: 1450, freqEnd: 260, dur: 0.55, gain: 0.2, type: 'sine', delay: 0.04 });
+  }
   empty() { this.noise({ dur: 0.03, gain: 0.3, type: 'highpass', freq: 3000 }); }
   winded() { this.tone({ freq: 220, freqEnd: 140, dur: 0.14, gain: 0.1, type: 'triangle' }); }
   reload() {
@@ -163,10 +176,10 @@ class Sfx {
   shieldHit(pos) { this.tone({ freq: rand(600, 800), freqEnd: 300, dur: 0.12, gain: 0.2, type: 'square', pos }); this.noise({ dur: 0.05, gain: 0.3, type: 'highpass', freq: 3000, pos }); }
   airdrop() { this.tone({ freq: 660, dur: 0.15, gain: 0.15, type: 'triangle' }); this.tone({ freq: 880, dur: 0.2, gain: 0.15, type: 'triangle', delay: 0.15 }); }
   crateLand(pos) { this.noise({ dur: 0.3, gain: 0.6, type: 'lowpass', freq: 500, freqEnd: 80, pos }); }
-  // ---------- music: an 8-bit theme, two pulse voices, a triangle bass, an arpeggio and drums ----------
+  // ---------- music: a modern ink/electronic action loop with synth lead, bass, arpeggio and drums ----------
   musicOn(on) {
     if (!this.ctx) return;
-    if (on && !this._mus) { this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.05; this.musicGain.connect(this.master); this._mus = { step: 0, next: this.ctx.currentTime + 0.1, timer: setInterval(() => this._musicTick(), 100) }; }
+    if (on && !this._mus) { this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.06; this.musicGain.connect(this.master); this._mus = { step: 0, next: this.ctx.currentTime + 0.1, timer: setInterval(() => this._musicTick(), 100) }; }
     else if (!on && this._mus) { clearInterval(this._mus.timer); this._mus = null; if (this.musicGain) this.musicGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.2); }
   }
   get musicPlaying() { return !!this._mus; }
@@ -186,9 +199,9 @@ class Sfx {
       const n = SONG.lead[i];
       if (n > 0) {
         const dur = SONG.len[i] * step * 0.9, f = midi(n);
-        this.tone({ freq: f, dur, gain: 0.1, type: 'square', at: t, out });
-        this.tone({ freq: f * 1.004, dur, gain: 0.04, type: 'square', at: t, out });
-        if (sec.shadow) this.tone({ freq: f * 2, dur: dur * 0.7, gain: sec.shadow, type: 'square', at: t, out });
+        this.tone({ freq: f, dur, gain: 0.075, type: 'sawtooth', at: t, out });
+        this.tone({ freq: f * 1.004, dur, gain: 0.028, type: 'sine', at: t, out });
+        if (sec.shadow) this.tone({ freq: f * 2, dur: dur * 0.7, gain: sec.shadow, type: 'triangle', at: t, out });
         if (sec.echo) { this.tone({ freq: f, dur: dur * 0.8, gain: 0.035, type: 'square', at: t + step * 3, out }); this.tone({ freq: f, dur: dur * 0.6, gain: 0.012, type: 'square', at: t + step * 6, out }); }
       }
       // bass: each section has its own feel; 'drive' and 'pump' walk toward the next chord on the last eighth
