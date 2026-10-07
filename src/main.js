@@ -626,7 +626,7 @@ function wireMap(onPick) { const box = hud.el.panel.querySelector('#mapsel'); if
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function mainHTML() {
-  return `<h1>DodNite</h1><h2>DodNite</h2>
+  return `<h1>DodNite</h1>
     <div class="mainbtns"><button type="button" class="start" id="soloBtn">Launch Run<i>Solo · endless rounds</i></button><button type="button" id="onlineBtn">Rival Rush<i>Up to 10 rivals</i></button></div>
     ${mapHTML(mapKey, true)}${START_CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">Best Run · ${best}</div>` : ''}`;
 }
