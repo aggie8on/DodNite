@@ -126,6 +126,23 @@ class Sfx {
   death() { this.tone({ freq: 220, freqEnd: 30, dur: 1.2, gain: 0.4, type: 'sawtooth' }); this.noise({ dur: 0.8, gain: 0.35, type: 'lowpass', freq: 800, freqEnd: 80 }); }
   hitEnemy(pos) { this.noise({ dur: 0.06, gain: 0.3, type: 'lowpass', freq: 900, pos }); this.tone({ freq: rand(200, 260), freqEnd: 120, dur: 0.1, gain: 0.15, type: 'square', pos }); }
   headshot(pos) { this.noise({ dur: 0.05, gain: 0.5, type: 'highpass', freq: 3000, pos }); this.tone({ freq: 1500, freqEnd: 500, dur: 0.09, gain: 0.2, type: 'triangle', pos }); }
+  criticalHit(pos) {
+    this.noise({ dur: 0.07, gain: 0.48, type: 'highpass', freq: 3200, pos });
+    this.tone({ freq: 980, freqEnd: 1550, dur: 0.11, gain: 0.24, type: 'triangle', pos });
+    this.tone({ freq: 1550, freqEnd: 2100, dur: 0.13, gain: 0.16, type: 'sine', delay: 0.045, pos });
+  }
+  combo(n = 3) {
+    const notes = n >= 8 ? [660, 880, 1175, 1568] : n >= 5 ? [620, 830, 1047] : [560, 740];
+    notes.forEach((f, i) => this.tone({ freq: f, dur: 0.09, gain: 0.14, type: 'triangle', delay: i * 0.045 }));
+    this.noise({ dur: 0.06, gain: 0.16 + Math.min(n, 10) * 0.012, type: 'highpass', freq: 3600, delay: 0.02 });
+  }
+  playerHit(pos, critical = false) {
+    this.noise({ dur: 0.12, gain: critical ? 0.62 : 0.4, type: 'bandpass', freq: critical ? 720 : 520, freqEnd: 120, q: 1.2, pos });
+    this.tone({ freq: critical ? 180 : 120, freqEnd: 55, dur: 0.16, gain: critical ? 0.36 : 0.28, type: 'sawtooth' });
+  }
+  nearMiss(pos) {
+    this.noise({ dur: 0.16, gain: 0.18, type: 'highpass', freq: 2400, freqEnd: 700, pos });
+  }
   // a kill: a short two-note ping over a thump, the kind of sound you want to hear again
   kill(strong = false) { this.tone({ freq: 880, freqEnd: 880, dur: 0.07, gain: 0.22, type: 'square' }); this.tone({ freq: 1320, freqEnd: 1320, dur: 0.16, gain: 0.2, type: 'square', delay: 0.07 }); this.tone({ freq: 140, freqEnd: 50, dur: 0.16, gain: strong ? 0.6 : 0.35, type: 'sine' }); if (strong) this.tone({ freq: 1760, dur: 0.22, gain: 0.12, type: 'triangle', delay: 0.14 }); }
   enemyDie(pos) {
