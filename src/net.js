@@ -13,8 +13,8 @@ const PREFIX = LOCAL ? 'dodnitedev-' : 'dodnite-';
 const PUBLIC_SLOTS = 16;
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const makeCode = () => Array.from({ length: 5 }, () => ALPHABET[Math.floor(Math.random() * ALPHABET.length)]).join('');
-const PEER_OPTS = { debug: 0, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] } };
-const JOIN_TIMEOUT = 14000, QUICK_TIMEOUT = 11000, SIGNAL_TIMEOUT = 12000;
+const PEER_OPTS = { host: '0.peerjs.com', port: 443, secure: true, path: '/', debug: 1, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] } };
+const JOIN_TIMEOUT = 18000, QUICK_TIMEOUT = 14000, SIGNAL_TIMEOUT = 20000;
 
 function peerAvailable() { return typeof window !== 'undefined' && typeof window.Peer === 'function'; }
 const idFromError = (err) => { const m = /peer\s+(\S+)/.exec(String(err && err.message || '')); return m ? m[1] : null; };
