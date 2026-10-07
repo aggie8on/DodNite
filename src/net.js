@@ -30,7 +30,7 @@ export class Net {
   constructor() {
     this.peer = null; this.conns = new Map(); this.isHost = false; this.id = null; this.code = null; this.hostId = null;
     this.handlers = new Map(); this.connected = false; this.onPeerJoin = null; this.onPeerLeave = null; this.onDisconnect = null;
-    this.maxPlayers = 10; this.accepting = true; this.hostName = ''; this.stats = { sent: 0, recv: 0 }; this.isPublic = false;
+    this.maxPlayers = 10; this.accepting = true; this.hostName = ''; this.stats = { sent: 0, recv: 0 }; this.isPublic = false; this.onVoiceCall = null;
   }
   get active() { return !!this.peer && this.connected; }
   get peerIds() { return [...this.conns.keys()]; }
@@ -43,6 +43,7 @@ export class Net {
         const peer = new window.Peer(id, PEER_OPTS); let settled = false;
       const timer = setTimeout(() => { if (!settled) { settled = true; peer.destroy(); reject(new Error('signalling server timed out')); } }, SIGNAL_TIMEOUT);
         peer.on('open', () => { if (settled) return; settled = true; clearTimeout(timer); resolve(peer); });
+      peer.on('call', (call) => { if (this.onVoiceCall) this.onVoiceCall(call); });
         peer.on('error', (err) => { if (settled) return; settled = true; clearTimeout(timer); peer.destroy(); reject(err); });
       }).catch(reject);
     });
@@ -212,6 +213,13 @@ export class Net {
     for (const c of this.conns.values()) { try { c.close(); } catch (e) { /* ignore */ } }
     this.conns.clear(); if (this.peer) { try { this.peer.destroy(); } catch (e) { /* ignore */ } }
     this.peer = null; this.connected = false; this.isHost = false; this.id = null; this.code = null; this.hostId = null; this.leaving = false;
+  }
+
+  // ---- voice media ----
+  setVoiceHandler(fn) { this.onVoiceCall = fn; }
+  callVoice(peerId, stream) {
+    if (!this.peer || this.peer.destroyed || !peerId || !stream) return null;
+    try { return this.peer.call(peerId, stream, { metadata: { app: 'DodNite', voice: true } }); } catch (e) { return null; }
   }
 
   // ---- messaging ----
