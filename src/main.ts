@@ -27,7 +27,7 @@ scene.add(world);
 
 const toon = (color: number) => new THREE.MeshToonMaterial({ color });
 const outline = (geometry: THREE.BufferGeometry, color = 0x101010) => {
-  const mesh = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), new THREE.LineBasicMaterial({ color, transparent: true, opacity: .7 }));
+  const mesh = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), new THREE.LineBasicMaterial({ color, transparent: true, opacity: .82 }));
   mesh.renderOrder = 3;
   return mesh;
 };
@@ -44,7 +44,6 @@ function box(x:number,z:number,w:number,h:number,d:number,c=0x59615e) {
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(260,260), toon(0x303735));
 ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; world.add(ground);
 
-// Abandoned-city blocks and doodle-like props.
 for (let i=0;i<70;i++) {
   const x=(Math.random()-.5)*175, z=(Math.random()-.5)*175;
   if (Math.hypot(x,z)<17) continue;
@@ -64,7 +63,8 @@ for(let i=0;i<26;i++) {
   crate.userData.destructible=true;
 }
 
-type Enemy = { m: THREE.Group; hp: number; speed: number; kind: 'grunt'|'runner'|'tank' };
+type EnemyKind = 'grunt'|'runner'|'gunner'|'heavy'|'sniper';
+type Enemy = { m: THREE.Group; hp: number; speed: number; kind: EnemyKind; parts: THREE.Object3D[]; phase:number };
 const enemies: Enemy[] = [];
 const projectiles: THREE.Mesh[] = [];
 const keys = new Set<string>();
@@ -101,18 +101,98 @@ function flash(text:string) {
   hud.message.textContent=text; hud.message.classList.add('show');
   setTimeout(()=>hud.message.classList.remove('show'),650);
 }
-function spawn(kind?: Enemy['kind']) {
-  const types: Enemy['kind'][]=['grunt','grunt','runner','tank'];
-  const k=kind ?? types[Math.floor(Math.random()*types.length)];
+
+function addOutlinedPart(parent:THREE.Group, mesh:THREE.Mesh) {
+  mesh.castShadow=true; mesh.receiveShadow=true; mesh.add(outline(mesh.geometry)); parent.add(mesh);
+  return mesh;
+}
+function limb(parent:THREE.Group, a:THREE.Vector3, b:THREE.Vector3, radius:number, material:THREE.Material) {
+  const delta=b.clone().sub(a), len=delta.length();
+  const mesh=new THREE.Mesh(new THREE.CapsuleGeometry(radius,len*.5,4,6),material);
+  mesh.position.copy(a).add(b).multiplyScalar(.5);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
+  return addOutlinedPart(parent,mesh);
+}
+function doodleEnemy(kind:EnemyKind) {
   const g=new THREE.Group();
-  const bodyColor=k==='tank'?0x7d4d4d:k==='runner'?0xe18d46:0xd85c4f;
-  const body=new THREE.Mesh(new THREE.CapsuleGeometry(k==='tank'?.8:.62,k==='tank'?1.8:1.35,4,8),toon(bodyColor));
-  body.position.y=k==='tank'?1.55:1.35; g.add(body); body.add(outline(body.geometry));
-  const head=new THREE.Mesh(new THREE.SphereGeometry(k==='tank'?.58:.46,8,6),toon(0x252525));
-  head.position.y=k==='tank'?2.95:2.55; g.add(head); head.add(outline(head.geometry));
+  const scale=kind==='heavy'?1.28:kind==='runner'?.94:1;
+  const bodyColor={grunt:0xd85c4f,runner:0xe18d46,gunner:0x4c87c7,heavy:0x7d4d4d,sniper:0x7666b8}[kind];
+  const skin=0xc98f6b;
+  const ink=0x111111;
+  const parts:THREE.Object3D[]=[];
+
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(.72*scale,1.02*scale,.42*scale),toon(bodyColor));
+  torso.position.y=1.45*scale; addOutlinedPart(g,torso); parts.push(torso);
+
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.43*scale,10,8),toon(skin));
+  head.scale.set(1,.98,.9); head.position.y=2.35*scale; addOutlinedPart(g,head); parts.push(head);
+
+  const eyeMat=toon(ink);
+  for(const x of [-.15,.15]) {
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(.045*scale,6,6),eyeMat);
+    eye.position.set(x*scale,2.4*scale,.39*scale); g.add(eye); parts.push(eye);
+  }
+  const mouth=new THREE.Mesh(new THREE.BoxGeometry(.2*scale,.035*scale,.025*scale),toon(ink));
+  mouth.position.set(0,2.2*scale,.405*scale); g.add(mouth); parts.push(mouth);
+
+  const shoulderY=1.82*scale, hipY=.98*scale;
+  const leftArm=limb(g,new THREE.Vector3(-.43*scale,shoulderY,0),new THREE.Vector3(-.68*scale,1.28*scale,.02),.105*scale,toon(bodyColor));
+  const rightArm=limb(g,new THREE.Vector3(.43*scale,shoulderY,0),new THREE.Vector3(.68*scale,1.28*scale,.02),.105*scale,toon(bodyColor));
+  const leftLeg=limb(g,new THREE.Vector3(-.2*scale,hipY,0),new THREE.Vector3(-.27*scale,.18*scale,0),.13*scale,toon(0x24272a));
+  const rightLeg=limb(g,new THREE.Vector3(.2*scale,hipY,0),new THREE.Vector3(.27*scale,.18*scale,0),.13*scale,toon(0x24272a));
+  parts.push(leftArm,rightArm,leftLeg,rightLeg);
+
+  const shoeMat=toon(0x111111);
+  for(const x of [-.3,.3]) {
+    const shoe=new THREE.Mesh(new THREE.BoxGeometry(.28*scale,.12*scale,.5*scale),shoeMat);
+    shoe.position.set(x*scale,.1*scale,.12*scale); addOutlinedPart(g,shoe); parts.push(shoe);
+  }
+
+  if(kind==='runner') {
+    torso.rotation.x=-.18; head.position.z=.08*scale;
+  }
+  if(kind==='heavy') {
+    const shoulder=new THREE.Mesh(new THREE.BoxGeometry(1.05*scale,.25*scale,.55*scale),toon(0x4b5157));
+    shoulder.position.y=1.9*scale; addOutlinedPart(g,shoulder); parts.push(shoulder);
+    const helmet=new THREE.Mesh(new THREE.SphereGeometry(.49*scale,8,6),toon(0x353b40));
+    helmet.scale.y=.7; helmet.position.y=2.62*scale; addOutlinedPart(g,helmet); parts.push(helmet);
+  }
+
+  if(kind==='grunt'||kind==='gunner'||kind==='sniper') {
+    const weaponMat=toon(ink);
+    const length=kind==='sniper'?.95:.7;
+    const gun=new THREE.Mesh(new THREE.BoxGeometry(.1*scale,.1*scale,length*scale),weaponMat);
+    gun.position.set(.72*scale,1.3*scale,.18*scale); gun.rotation.x=-.1; gun.rotation.z=-.12;
+    addOutlinedPart(g,gun); parts.push(gun);
+    const stock=new THREE.Mesh(new THREE.BoxGeometry(.16*scale,.13*scale,.22*scale),weaponMat);
+    stock.position.set(.52*scale,1.3*scale,.08*scale); addOutlinedPart(g,stock); parts.push(stock);
+  }
+  if(kind==='sniper') {
+    const scope=new THREE.Mesh(new THREE.CylinderGeometry(.035*scale,.035*scale,.22*scale,6),toon(0x202020));
+    scope.rotation.z=Math.PI/2; scope.position.set(.7*scale,1.43*scale,.18*scale); addOutlinedPart(g,scope); parts.push(scope);
+  }
+  if(kind==='runner') {
+    const blade=new THREE.Mesh(new THREE.BoxGeometry(.06*scale,.06*scale,.72*scale),toon(0xd9d9d9));
+    blade.position.set(.72*scale,1.2*scale,.12*scale); blade.rotation.x=-.5; addOutlinedPart(g,blade); parts.push(blade);
+  }
+  if(kind==='heavy') {
+    const pack=new THREE.Mesh(new THREE.BoxGeometry(.42*scale,.65*scale,.2*scale),toon(0x383d40));
+    pack.position.set(0,1.42*scale,-.3*scale); addOutlinedPart(g,pack); parts.push(pack);
+  }
+  return {g,parts};
+}
+
+function spawn(kind?: EnemyKind) {
+  const types: EnemyKind[]=['grunt','grunt','runner','gunner','heavy','sniper'];
+  const k=kind ?? types[Math.floor(Math.random()*types.length)];
+  const made=doodleEnemy(k), g=made.g;
   const a=Math.random()*Math.PI*2,r=28+Math.random()*40;
   g.position.set(Math.cos(a)*r,0,Math.sin(a)*r); world.add(g);
-  enemies.push({m:g,hp:k==='tank'?10:k==='runner'?2:3,speed:k==='tank'?1.55:k==='runner'?4.1:2.35,kind:k});
+  const stats={
+    grunt:{hp:3,speed:2.35},runner:{hp:2,speed:4.4},gunner:{hp:3,speed:1.9},
+    heavy:{hp:12,speed:1.35},sniper:{hp:4,speed:1.35}
+  }[k];
+  enemies.push({m:g,hp:stats.hp,speed:stats.speed,kind:k,parts:made.parts,phase:Math.random()*Math.PI*2});
 }
 function startWave() {
   for(let i=0;i<4+wave*2;i++) spawn();
@@ -120,7 +200,7 @@ function startWave() {
 }
 function killEnemy(e:Enemy) {
   world.remove(e.m); enemies.splice(enemies.indexOf(e),1);
-  score += e.kind==='tank'?700:350; kills++;
+  score += e.kind==='heavy'?900:e.kind==='sniper'?600:e.kind==='gunner'?500:e.kind==='runner'?350:300; kills++;
   if(!enemies.length) { wave++; score+=1000; startWave(); }
   updateHud();
 }
@@ -134,8 +214,7 @@ function hitScan(damage:number, spread:number) {
   const targets=enemies.flatMap(e=>e.m.children);
   const hits=ray.intersectObjects(targets,true);
   if(!hits.length) return;
-  let obj:THREE.Object3D|null=hits[0].object;
-  let owner:Enemy|undefined;
+  let obj:THREE.Object3D|null=hits[0].object; let owner:Enemy|undefined;
   while(obj) { owner=enemies.find(e=>e.m===obj); if(owner) break; obj=obj.parent; }
   if(owner) { owner.hp-=damage; score+=50; if(owner.hp<=0) killEnemy(owner); updateHud(); }
 }
@@ -145,7 +224,6 @@ function fire() {
   if(now-lastShot<w.cooldown || !locked) return;
   lastShot=now;
   if(weaponIndex===3) {
-    // Katana slash: short cone represented by several close ray checks.
     for(let i=-2;i<=2;i++) hitScan(w.damage,Math.abs(i)*.045+.015);
     flash('PARRY READY');
   } else if(weaponIndex===4) {
@@ -179,9 +257,7 @@ addEventListener('keydown',e=>{
   if(e.code==='Space' && grounded) { velY=9; grounded=false; jumps=1; }
   else if(e.code==='Space' && !grounded && jumps<2) { velY=8.5; jumps=2; flash('DOUBLE JUMP'); }
   if(e.code==='KeyC' && grounded) { slideUntil=performance.now()+480; flash('SLIDE'); }
-  if(e.code==='KeyF' && performance.now()-lastDash>900) {
-    dashUntil=performance.now()+130; lastDash=performance.now();
-  }
+  if(e.code==='KeyF' && performance.now()-lastDash>900) { dashUntil=performance.now()+130; lastDash=performance.now(); }
 });
 addEventListener('keyup',e=>keys.delete(e.code));
 
@@ -212,7 +288,7 @@ function loop(t:number) {
 
   const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight');
   const sliding=t<slideUntil;
-  let speed= sprint?11:7;
+  let speed=sprint?11:7;
   if(sliding) speed=14;
   if(t<dashUntil) speed=32;
   camera.position.addScaledVector(dir,speed*dt);
@@ -222,7 +298,6 @@ function loop(t:number) {
   if(camera.position.y<=2){camera.position.y=2;velY=0;grounded=true;jumps=0;}
   else grounded=false;
 
-  // Keep the player inside the playable area.
   camera.position.x=THREE.MathUtils.clamp(camera.position.x,-118,118);
   camera.position.z=THREE.MathUtils.clamp(camera.position.z,-118,118);
 
@@ -242,8 +317,16 @@ function loop(t:number) {
     const d=camera.position.clone().sub(e.m.position); d.y=0;
     const dist=d.length();
     if(dist>2.1) e.m.position.addScaledVector(d.normalize(),dt*e.speed);
-    else if(t%90<90*dt+2) { hp-=dt*(e.kind==='tank'?18:10); updateHud(); }
+    else if(t%90<90*dt+2) { hp-=dt*(e.kind==='heavy'?18:10); updateHud(); }
     e.m.lookAt(camera.position.x,e.m.position.y,camera.position.z);
+    const moving=dist>2.1;
+    const bob=Math.sin(t*.012*e.speed+e.phase)*.045;
+    const s=Math.sin(t*.009*e.speed+e.phase);
+    if(e.kind==='runner') { e.m.rotation.z=s*.045; e.m.position.y=bob; }
+    else if(e.kind==='heavy') { e.m.rotation.z=s*.018; e.m.position.y=bob*.45; }
+    else { e.m.rotation.z=s*.025; e.m.position.y=bob; }
+    if(e.kind==='gunner' || e.kind==='sniper') e.m.rotation.z*=.35;
+    if(moving && e.kind==='runner') e.m.rotation.x=Math.sin(t*.014+e.phase)*.035;
   }
   if(hp<=0) resetPlayer();
 
