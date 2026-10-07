@@ -588,7 +588,7 @@ function friendlyError(err) {
   if (/no lobby with that code/.test(m)) return 'Room code not found · check with your friend';
   if (/no answer/.test(m)) return 'No room response · try again';
   if (/full/.test(m)) return 'Room full · try another code';
-  if (/leave the lobby/.test(m)) return 'LeaveYouLobby';
+  if (/leave the lobby/.test(m)) return 'Please exit the current room first';
   return m;
 }
 function setStatus(t) { lobby.status = t; const el = hud.el.panel.querySelector('#status'); if (el) el.textContent = t; }
@@ -596,9 +596,9 @@ function setStatus(t) { lobby.status = t; const el = hud.el.panel.querySelector(
 // ---------------- screens ----------------
 function settingsHTML() {
   return `<div class="settings" id="settings">
-    <label>Mouse <input type="range" id="setSens" min="25" max="250" step="5" value="${settings.sens}"><b id="setSensV">${settings.sens}%</b></label>
-    <label><input type="checkbox" id="setInv" ${settings.invert ? 'checked' : ''}> Look</label>
-    <label><input type="checkbox" id="setMus" ${musicWanted ? 'checked' : ''}> Music <span class="k">(M)</span></label>
+    <label>Aim Sensitivity <input type="range" id="setSens" min="25" max="250" step="5" value="${settings.sens}"><b id="setSensV">${settings.sens}%</b></label>
+    <label><input type="checkbox" id="setInv" ${settings.invert ? 'checked' : ''}> Invert Look</label>
+    <label><input type="checkbox" id="setMus" ${musicWanted ? 'checked' : ''}> Audio <span class="k">(M)</span></label>
   </div>`;
 }
 function wireSettings() {
@@ -615,13 +615,13 @@ function wireName(box) {
 }
 function checkpointHTML() {
   if (checkpoint < 5) return '';
-  let h = '<div class="checkpoints"><span>Checkpoint</span>';
-  for (let w = 5; w <= checkpoint; w += 5) h += `<button type="button" data-cp="${w}">Wave  ${w}  waves</button>`;
+  let h = '<div class="checkpoints"><span>Saved Runs</span>';
+  for (let w = 5; w <= checkpoint; w += 5) h += `<button type="button" data-cp="${w}">Round ${w}</button>`;
   return h + '</div>';
 }
 function wireCheckpoints(onGo) { const box = hud.el.panel.querySelector('.checkpoints'); if (!box) return; box.addEventListener('click', (e) => { e.stopPropagation(); const b = e.target.closest('button'); if (b) onGo(Number(b.dataset.cp)); }); }
 const mapName = (k) => (LEVELS.find((m) => m.key === k) || LEVELS[0]).name;
-function mapHTML(sel, canPick) { if (LEVELS.length < 2) return ''; return `<div class="mapsel" id="mapsel"><span>Map</span>${LEVELS.map((m) => `<button type="button" class="mapbtn${m.key === sel ? ' on' : ''}" data-map="${m.key}" ${canPick ? '' : 'disabled'}>${m.name}<i>${m.blurb}</i></button>`).join('')}</div>`; }
+function mapHTML(sel, canPick) { if (LEVELS.length < 2) return ''; return `<div class="mapsel" id="mapsel"><span>Stage</span>${LEVELS.map((m) => `<button type="button" class="mapbtn${m.key === sel ? ' on' : ''}" data-map="${m.key}" ${canPick ? '' : 'disabled'}>${m.name}<i>${m.blurb}</i></button>`).join('')}</div>`; }
 function wireMap(onPick) { const box = hud.el.panel.querySelector('#mapsel'); if (!box) return; box.addEventListener('click', (e) => { e.stopPropagation(); const b = e.target.closest('.mapbtn'); if (b && !b.disabled) onPick(b.dataset.map); }); }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
