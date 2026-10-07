@@ -42,7 +42,7 @@ export class Player {
     const b = this.body; b.pos.copy(pos); b.vel.set(0, 0, 0); b.onGround = false; b.height = STAND_H;
     this.hp = this.maxHp; this.alive = true; this.yaw = 0; this.pitch = 0; this.roll = 0; this.hurtFx = 0; this.flashFx = 0; this.crouching = false; this.sliding = false; this.deathT = 0; this.lastDamageT = 10; this.dashCd = 0; this.airJumps = 1; this.gravityScale = 1; this.dashLock = false;
     this.detachGrapple(false);
-    for (const w of this.weapons) if (w.isGun) { w.mag = w.magSize; w.reserve = w.startReserve; w.reloading = false; w.pumpT = 0; }
+    for (const w of this.weapons) if (w.isGun) { w.mag = w.magSize; w.reserve = w.startReserve; w.reloading = false; w.pumpT = 0; w.burstRemaining = 0; }
     this.switchTo(0, true); this.rig.visible = true; this.eyeH = EYE_STAND; this.grenades = 3; this.clearNades();
   }
   clearNades() { for (const n of this.nades) this.ctx.scene.remove(n.mesh); this.nades.length = 0; }
