@@ -12,7 +12,7 @@ import { EnemyManager, BOSSES } from './enemies.js';
 import { Player } from './player.js';
 import { RemotePlayer, encodeLocal } from './players.js';
 import { Net } from './net.js';
-import { HUD, CONTROLS_HTML } from './hud.js';
+import { HUD, START_CONTROLS_HTML, CONTROLS_HTML } from './hud.js';
 import { audio } from './audio.js';
 import { rand, choose, clamp } from './util.js';
 
