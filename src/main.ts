@@ -64,13 +64,13 @@ for(let i=0;i<26;i++) {
 }
 
 type EnemyKind = 'grunt'|'runner'|'gunner'|'heavy'|'sniper';
-type Enemy = { m: THREE.Group; hp: number; speed: number; kind: EnemyKind; parts: THREE.Object3D[]; phase:number };
+type Enemy = { m: THREE.Group; hp: number; speed: number; kind: EnemyKind; parts: THREE.Object3D[]; phase:number; ranged?: boolean; boss?: boolean };
 const enemies: Enemy[] = [];
 const projectiles: THREE.Mesh[] = [];
 const keys = new Set<string>();
 
 let yaw=0,pitch=0,velY=0,locked=false;
-let hp=100,score=0,wave=1,kills=0;
+let hp=100,score=0,wave=1,kills=0;\nlet levelPhase:'waves'|'objective'|'boss'|'complete'='waves';\nlet objectiveCrates=0;\nlet bossSpawned=false;
 let grounded=true,jumps=0,slideUntil=0,dashUntil=0,lastDash=0,lastShot=0;
 let weaponIndex=0;
 const weapons = [
@@ -80,6 +80,56 @@ const weapons = [
   {name:'KATANA', damage:5, cooldown:430, pellets:1, spread:0},
   {name:'GRENADE', damage:10, cooldown:850, pellets:1, spread:.02}
 ];
+
+const weaponView = new THREE.Group();
+camera.add(weaponView);
+const handMat = toon(0x8f5f45);
+const weaponInk = toon(0x16191a);
+
+function fpBox(parent:THREE.Group, size:[number,number,number], pos:[number,number,number], color:number, rot?:[number,number,number]) {
+  const m=new THREE.Mesh(new THREE.BoxGeometry(...size),toon(color));
+  m.position.set(...pos); if(rot)m.rotation.set(...rot); m.castShadow=true; m.add(outline(m.geometry)); parent.add(m); return m;
+}
+function buildFirstPersonWeapon(index:number) {
+  weaponView.clear();
+  const group=new THREE.Group();
+  group.position.set(.48,-.38,-.72);
+  group.rotation.set(-.05,-.04,.02);
+  weaponView.add(group);
+  if(index===0||index===1||index===2) {
+    const long=index===2?1.55:index===1?1.05:1.25;
+    const body=index===1?0x5b5147:0x252a2d;
+    fpBox(group,[.28,.22,long],[0,0,-long*.42],body,[0,0,0]);
+    fpBox(group,[.1,.1,long*.72],[0,.1,-long*.78],0x111111);
+    fpBox(group,[.18,.32,.25],[0,-.2,-.18],0x202326,[.35,0,0]);
+    if(index===2) {
+      const scope=fpBox(group,[.12,.12,.42],[0,.2,-.58],0x111111);
+      scope.rotation.x=0;
+    }
+    const rightHand=fpBox(group,[.18,.16,.42],[.22,-.18,-.28],0x8f5f45,[.35,0,.15]);
+    const leftHand=fpBox(group,[.18,.16,.42],[-.2,-.16,-.72],0x8f5f45,[.35,0,-.12]);
+    rightHand.scale.set(1,.8,1); leftHand.scale.set(1,.8,1);
+  } else if(index===3) {
+    const blade=fpBox(group,[.11,.07,1.65],[.05,.08,-.8],0xd7dbe0,[0,.03,-.04]);
+    fpBox(group,[.3,.22,.22],[.02,-.02,.02],0x171717);
+    fpBox(group,[.18,.18,.5],[.02,-.18,.18],0x8f5f45,[.2,0,0]);
+  } else {
+    fpBox(group,[.32,.32,.32],[0,-.02,-.28],0x3e463f);
+    fpBox(group,[.22,.18,.4],[.02,-.18,.08],0x8f5f45,[.15,0,0]);
+    fpBox(group,[.08,.08,.25],[.14,.2,-.25],0xb6b6a8);
+  }
+  return group;
+}
+buildFirstPersonWeapon(0);
+
+function updateWeaponView() {
+  buildFirstPersonWeapon(weaponIndex);
+}
+function weaponKick(amount:number) {
+  weaponView.position.z += amount;
+  weaponView.rotation.x += amount*.45;
+  setTimeout(()=>{ weaponView.position.z -= amount; weaponView.rotation.x -= amount*.45; },70);
+}
 
 const hud = {
   wave:document.querySelector('#wave') as HTMLElement,
@@ -95,7 +145,7 @@ function updateHud() {
   hud.wave.textContent=String(wave); hud.score.textContent=String(score);
   hud.hp.textContent=String(Math.max(0,Math.floor(hp)));
   hud.weapon.textContent=weapons[weaponIndex].name;
-  hud.ammo.textContent=weaponIndex===4?'∞':'READY';
+  hud.ammo.textContent=weaponIndex===4?'∞':'READY';\n  updateWeaponView();
 }
 function flash(text:string) {
   hud.message.textContent=text; hud.message.classList.add('show');
@@ -192,7 +242,7 @@ function spawn(kind?: EnemyKind) {
     grunt:{hp:3,speed:2.35},runner:{hp:2,speed:4.4},gunner:{hp:3,speed:1.9},
     heavy:{hp:12,speed:1.35},sniper:{hp:4,speed:1.35}
   }[k];
-  enemies.push({m:g,hp:stats.hp,speed:stats.speed,kind:k,parts:made.parts,phase:Math.random()*Math.PI*2});
+  enemies.push({m:g,hp:stats.hp,speed:stats.speed,kind:k,parts:made.parts,phase:Math.random()*Math.PI*2,ranged:k==='gunner'||k==='sniper'});
 }
 function startWave() {
   for(let i=0;i<4+wave*2;i++) spawn();
@@ -201,7 +251,16 @@ function startWave() {
 function killEnemy(e:Enemy) {
   world.remove(e.m); enemies.splice(enemies.indexOf(e),1);
   score += e.kind==='heavy'?900:e.kind==='sniper'?600:e.kind==='gunner'?500:e.kind==='runner'?350:300; kills++;
-  if(!enemies.length) { wave++; score+=1000; startWave(); }
+  if(e.boss) { levelPhase='complete'; flash('LEVEL COMPLETE'); return; }
+  if(!enemies.length) {
+    if(levelPhase==='waves') {
+      wave++;
+      score+=1000;
+      if(wave===5) startWave();
+      else if(wave===10) spawnBoss();
+      else startWave();
+    }
+  }
   updateHud();
 }
 
@@ -222,7 +281,7 @@ function hitScan(damage:number, spread:number) {
 function fire() {
   const now=performance.now(), w=weapons[weaponIndex];
   if(now-lastShot<w.cooldown || !locked) return;
-  lastShot=now;
+  lastShot=now; weaponKick(.035);
   if(weaponIndex===3) {
     for(let i=-2;i<=2;i++) hitScan(w.damage,Math.abs(i)*.045+.015);
     flash('PARRY READY');
@@ -238,7 +297,7 @@ function fire() {
 }
 
 function switchWeapon(n:number) {
-  weaponIndex=(n+weapons.length)%weapons.length; updateHud(); flash(weapons[weaponIndex].name);
+  weaponIndex=(n+weapons.length)%weapons.length; updateHud(); updateWeaponView(); flash(weapons[weaponIndex].name);
 }
 function resetPlayer() {
   hp=100; score=Math.max(0,score-500); camera.position.set(0,2,8); velY=0;
@@ -313,11 +372,22 @@ function loop(t:number) {
     }
   }
 
+  if(levelPhase==='objective' && objectiveCrates>=5 && !enemies.length) {
+    wave=10; spawnBoss();
+  }
+
   for(const e of [...enemies]) {
     const d=camera.position.clone().sub(e.m.position); d.y=0;
     const dist=d.length();
     if(dist>2.1) e.m.position.addScaledVector(d.normalize(),dt*e.speed);
-    else if(t%90<90*dt+2) { hp-=dt*(e.kind==='heavy'?18:10); updateHud(); }
+    else if(t%90<90*dt+2) {
+      if(e.ranged) {
+        hp-=dt*(e.kind==='sniper'?8:5);
+      } else {
+        hp-=dt*(e.boss?28:e.kind==='heavy'?18:10);
+      }
+      updateHud();
+    }
     e.m.lookAt(camera.position.x,e.m.position.y,camera.position.z);
     const moving=dist>2.1;
     const bob=Math.sin(t*.012*e.speed+e.phase)*.045;
@@ -330,6 +400,9 @@ function loop(t:number) {
   }
   if(hp<=0) resetPlayer();
 
+  if(levelPhase==='complete') {
+    camera.position.y=2.15+Math.sin(t*.004)*.03;
+  }
   renderer.render(scene,camera); requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
