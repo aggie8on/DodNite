@@ -65,7 +65,7 @@ export class Player {
   takeDamage(amount, fromPos) {
     if (!this.alive) return;
     this.hp -= amount; this.lastDamageT = 0; this.hurtFx = Math.min(1, this.hurtFx + amount / 40);
-    this.ctx.effects.shakeAmt += 0.2 + amount / 80; audio.hurt(); this.ctx.input.rumble(0.8, 0.5, 160);
+    this.ctx.effects.shakeAmt += 0.2 + amount / 80; audio.hurt(); audio.playerHit(fromPos, amount >= 35); this.ctx.input.rumble(0.8, 0.5, 160);
     if (fromPos) { _v.subVectors(fromPos, this.eye); const x = _v.dot(this.right), f = _v.dot(this.forward); this.ctx.hud.damageFrom(Math.atan2(x, f)); }
     if (this.hp <= 0) { this.hp = 0; this.die(); }
   }
