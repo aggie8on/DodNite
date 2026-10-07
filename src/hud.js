@@ -4,21 +4,21 @@ export class HUD {
     this.root = root;
     root.innerHTML = `
       <div class="scope" id="scope"><div class="mask"></div><div class="ring"></div><div class="cx"></div><div class="cy"></div><div class="dot"></div></div>
-      <div class="focus-meter" id="focusmeter"><div class="fm-label">Katana</div><div class="fm-tube"><div class="fm-fill" id="fmfill"></div><i class="fm-f1"></i><i class="fm-f2"></i><i class="fm-f3"></i></div><div class="fm-ready" id="fmready">Katana Ready</div></div>
+      <div class="focus-meter" id="focusmeter"><div class="fm-label">EDGE</div><div class="fm-tube"><div class="fm-fill" id="fmfill"></div><i class="fm-f1"></i><i class="fm-f2"></i><i class="fm-f3"></i></div><div class="fm-ready" id="fmready">EDGE READY</div></div>
       <div class="focus-mark" id="focusmark"><i></i><i></i><i></i><i></i></div>
       <div class="crosshair" id="crosshair"><i class="ch-t"></i><i class="ch-b"></i><i class="ch-l"></i><i class="ch-r"></i><i class="ch-dot"></i></div>
       <div class="grapple-ret" id="gret"></div><div class="gstam" id="gstam" hidden><i id="gstamfill"></i></div>
       <div class="hitmarker" id="hitmarker"><i></i><i></i></div>
       <div class="dmg-ind" id="dmg"></div>
-      <div class="hud-tl"><div class="score">Score <b id="score">0</b></div><div class="combo" id="combo"></div></div>
-      <div class="hud-tr"><div class="wave">Wave <b id="wave">1</b></div><div class="modifier" id="modifier"></div><div class="left"><b id="left">0</b>  enemies left</div><div class="timer" id="timer"></div><div class="pvpscore" id="pvpscore" hidden></div></div><div class="board" id="board" hidden></div>
+      <div class="hud-tl"><div class="score">POINTS <b id="score">0</b></div><div class="combo" id="combo"></div></div>
+      <div class="hud-tr"><div class="wave">ROUND <b id="wave">1</b></div><div class="modifier" id="modifier"></div><div class="left"><b id="left">0</b>  THREATS</div><div class="timer" id="timer"></div><div class="pvpscore" id="pvpscore" hidden></div></div><div class="board" id="board" hidden></div>
       <div class="bossbar" id="bossbar"><div class="bossname" id="bossname"></div><div class="bar big"><div class="fill red" id="bossfill"></div></div></div>
       <div class="hud-bl">
-        <div class="health"><span>Health</span><div class="bar"><div class="fill" id="hpfill"></div></div><span id="hpnum">100</span></div>
-        <div class="ammo"><b id="mag">30</b><span id="reserve">/120</span><span class="reloading" id="reloading"></span><span class="nades" id="nades" title="Grenades"></span></div>
+        <div class="health"><span>VITAL</span><div class="bar"><div class="fill" id="hpfill"></div></div><span id="hpnum">100</span></div>
+        <div class="ammo"><b id="mag">30</b><span id="reserve">/120</span><span class="reloading" id="reloading"></span><span class="nades" id="nades" title="Charges"></span></div>
         <div class="tally" id="tally"></div>
       </div>
-      <div class="hud-br"><div class="slots" id="slots"></div><div class="weapon" id="weapon">Rifle</div><div class="hint" id="hint"></div></div>
+      <div class="hud-br"><div class="slots" id="slots"></div><div class="weapon" id="weapon">Pulse Carbine</div><div class="hint" id="hint"></div></div>
       <div class="tip" id="tip"></div>
       <div class="message"><div class="msg-main" id="msg"></div><div class="msg-sub" id="msgsub"></div></div>
       <div class="killfeed" id="killfeed"></div>
@@ -92,9 +92,9 @@ export class HUD {
 export const KB_KEYS = { fire: 'LMB', aim: 'RMB', block: 'RMB', jump: 'Space', sprint: 'Shift', slide: 'C', dash: 'C', grapple: 'Q', melee: 'F', reload: 'R', grenade: 'G', focus: 'Press both mouse buttons (or X)', next: 'wheel', pause: 'Esc', confirm: 'Space', score: 'Tab' };
 export const PAD_KEYS = { fire: 'R2', aim: 'L2', block: 'L2', jump: '✕', sprint: 'L3', slide: '○', dash: '○', grapple: 'L1', melee: 'R1', reload: '□', grenade: 'R3', focus: 'L2 + R2', next: '△', pause: 'Options', confirm: '✕', score: 'Create' };
 export const START_CONTROLS_HTML = `
-<div class="start-controls" aria-label="Game controls">
+<div class="start-controls" aria-label="Controls">
   <div class="control-device">
-    <div class="device-title">MOUSE + KEYBOARD</div>
+    <div class="device-title">DESKTOP RIG</div>
     <div class="device-art">
       <svg class="real-illustration keyboard-illustration" viewBox="0 0 560 270" role="img" aria-label="Mouse and keyboard illustration">
         <defs>
@@ -129,7 +129,7 @@ export const START_CONTROLS_HTML = `
     </div>
   </div>
   <div class="control-device">
-    <div class="device-title">PS5 CONTROLLER</div>
+    <div class="device-title">GAMEPAD</div>
     <div class="device-art">
       <svg class="real-illustration controller-illustration" viewBox="0 0 560 270" role="img" aria-label="PS5 controller illustration">
         <defs>
@@ -153,31 +153,31 @@ export const START_CONTROLS_HTML = `
     </div>
   </div>
 </div>
-<div class="control-footer"><span>CLICK OR PRESS ANY KEY TO START</span><span>•</span><span>WASD / STICKS TO MOVE</span></div>`;
+<div class="control-footer"><span>CLICK OR PRESS ANY KEY</span><span>•</span><span>MOVE WITH WASD / LEFT STICK</span></div>`;
 
 
 export const CONTROLS_HTML = `
 <div class="cols">
-  <div><div class="colhead">Mouse + Keyboard</div>
+  <div><div class="colhead">DESKTOP</div>
     <div><b>WASD</b> Move &nbsp; <b>Mouse</b> Look &nbsp; <b>Shift</b> Sprint</div>
     <div><b>LMB</b> Fire / Slash &nbsp; <b>RMB</b> Aim / Block</div>
     <div><b>Space</b> Jump(press again on wall = Wall Jump)</div>
     <div>press again in air <b>Space</b> = Double Jump</div>
     <div><b>C / Ctrl</b> Ground Slide  -  Air Dash</div>
     <div><b>Q / E</b> Grapple:Tap to swing,Hold to reel in,jump launch</div>
-    <div><b>F</b> Katana slash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
+    <div><b>F</b> Edge slash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
     <div><b>G</b> Grenades  -  Hold to throw farther</div>
     <div><b>Tab</b> Scoreboard(Online) &nbsp; <b>Esc</b> Pause</div>
     <div><b>Press both mouse buttons</b> Dash slash when full</div>
-    <div><b>1-4 / wheel</b> Rifle  -  Shotgun  -  Sniper Rifle  -  Katana</div>
+    <div><b>1-4 / wheel</b> Pulse Carbine  ·  Scattergun  ·  Longshot  ·  Edgeblade</div>
   </div>
-  <div><div class="colhead">PS5 Controller</div>
+  <div><div class="colhead">GAMEPAD</div>
     <div><b>Left Stick</b> Move &nbsp; <b>Right Stick</b> Look &nbsp; <b>L3</b> Sprint</div>
     <div><b>R2</b> Fire / Slash &nbsp; <b>L2</b> Aim / Block</div>
     <div><b>✕</b> Jump &nbsp; <b>○</b> Slide  -  Air Dash</div>
     <div><b>L1</b> Grapple(Hold to reel in,✕ Launch)</div>
-    <div><b>L2 + R2</b> KatanaDash slash when full</div>
-    <div><b>R1</b> Katana slash,then auto-switch back to guns</div>
+    <div><b>L2 + R2</b> Edge Dash slash when full</div>
+    <div><b>R1</b> Edge slash,then auto-switch back to guns</div>
     <div><b>□</b> Reload &nbsp; <b>△</b> Next weapon</div>
     <div><b>R3 / D-pad Up</b> Grenades  -  Hold to throw farther</div>
     <div><b>Create</b> Scoreboard(Online) &nbsp; <b>Options</b> Pause</div>
