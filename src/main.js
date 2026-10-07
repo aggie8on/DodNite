@@ -78,7 +78,7 @@ const voice = new VoiceChat(net, (state) => {
   hud.setVoice(state.enabled, state.muted, state.peers);
   const b = hud.el.panel?.querySelector('#roomVoiceBtn');
   if (b) {
-    b.textContent = state.enabled ? (state.muted ? '🔇 Voice Muted' : \`🎙 Voice On\${state.peers ? ' · ' + state.peers : ''}\`) : '🎙 Enable Voice';
+    b.textContent = state.enabled ? (state.muted ? '🔇 Voice Muted' : `🎙 Voice On${state.peers ? ' · ' + state.peers : ''}`) : '🎙 Enable Voice';
     b.classList.toggle('on', state.enabled && !state.muted);
     b.classList.toggle('muted', state.muted);
   }
