@@ -91,6 +91,39 @@ export class HUD {
 
 export const KB_KEYS = { fire: 'LMB', aim: 'RMB', block: 'RMB', jump: 'Space', sprint: 'Shift', slide: 'C', dash: 'C', grapple: 'Q', melee: 'F', reload: 'R', grenade: 'G', focus: '左右键同按（或 X）', next: '滚轮', pause: 'Esc', confirm: 'Space', score: 'Tab' };
 export const PAD_KEYS = { fire: 'R2', aim: 'L2', block: 'L2', jump: '✕', sprint: 'L3', slide: '○', dash: '○', grapple: 'L1', melee: 'R1', reload: '□', grenade: 'R3', focus: 'L2 + R2', next: '△', pause: 'Options', confirm: '✕', score: 'Create' };
+export const START_CONTROLS_HTML = `
+<div class="start-controls" aria-label="Controls">
+  <div class="control-device keyboard-device">
+    <div class="device-title">MOUSE + KEYBOARD</div>
+    <div class="device-art"><svg class="doodle-keyboard" viewBox="0 0 520 250" role="img" aria-label="Doodle keyboard and mouse">
+      <g class="mouse" transform="translate(40 25) rotate(-7)"><path d="M38 14 C13 15 2 34 5 65 C8 101 23 119 47 118 C72 117 86 95 84 62 C82 30 66 13 38 14Z"/><path d="M8 56 C28 50 61 50 82 57"/><path d="M45 18 L45 56"/><rect x="39" y="29" width="12" height="18" rx="5"/></g>
+      <g class="keyboard" transform="translate(132 56) rotate(-2)"><path d="M8 12 Q12 3 23 4 L360 4 Q373 5 378 16 L397 170 Q399 184 385 187 L24 187 Q10 186 9 173Z"/>
+        <g class="keys"><rect x="27" y="22" width="34" height="24"/><rect x="66" y="22" width="34" height="24"/><rect x="105" y="22" width="34" height="24"/><rect x="144" y="22" width="34" height="24"/><rect x="183" y="22" width="34" height="24"/><rect x="222" y="22" width="34" height="24"/><rect x="261" y="22" width="34" height="24"/><rect x="300" y="22" width="34" height="24"/>
+          <rect class="hot" x="27" y="54" width="38" height="27"/><rect class="hot" x="70" y="54" width="38" height="27"/><rect class="hot" x="113" y="54" width="38" height="27"/><rect x="156" y="54" width="38" height="27"/><rect x="199" y="54" width="38" height="27"/><rect x="242" y="54" width="38" height="27"/><rect x="285" y="54" width="48" height="27"/>
+          <rect x="27" y="88" width="52" height="27"/><rect x="84" y="88" width="38" height="27"/><rect x="127" y="88" width="38" height="27"/><rect x="170" y="88" width="38" height="27"/><rect x="213" y="88" width="38" height="27"/><rect x="256" y="88" width="38" height="27"/><rect class="hot" x="299" y="88" width="34" height="27"/>
+          <rect x="27" y="122" width="48" height="27"/><rect x="80" y="122" width="48" height="27"/><rect x="133" y="122" width="48" height="27"/><rect class="hot" x="186" y="122" width="115" height="27"/><rect x="306" y="122" width="27" height="27"/></g>
+        <text x="39" y="73">W</text><text x="82" y="73">A</text><text x="125" y="73">S</text><text x="311" y="106">R</text><text x="226" y="140">SPACE</text></g>
+      <g class="leader-lines"><path d="M175 91 C125 78 83 83 25 102"/><path d="M266 145 C335 126 403 119 493 100"/><path d="M238 178 C310 190 387 192 490 181"/></g>
+      <g class="callout"><text x="10" y="110">WASD · MOVE</text><text x="352" y="97">R · RELOAD</text><text x="365" y="183">SPACE · JUMP</text></g>
+    </svg></div>
+    <div class="control-row"><span class="key-pill">LMB</span><span>FIRE</span><span class="key-pill">RMB</span><span>AIM / BLOCK</span></div>
+    <div class="control-row"><span class="key-pill">SHIFT</span><span>SPRINT</span><span class="key-pill">C</span><span>SLIDE / DASH</span></div>
+    <div class="control-row"><span class="key-pill">Q</span><span>GRAPPLE</span><span class="key-pill">G</span><span>GRENADE</span></div>
+  </div>
+  <div class="control-device pad-device">
+    <div class="device-title">PS5 CONTROLLER</div>
+    <div class="device-art"><svg class="doodle-pad" viewBox="0 0 520 250" role="img" aria-label="Doodle PS5 controller">
+      <g class="pad" transform="translate(70 40) rotate(-2 190 85)"><path d="M50 62 C67 28 96 17 137 25 C164 31 212 31 239 25 C280 17 309 28 326 62 C342 94 351 133 345 165 C341 187 326 196 312 180 L279 143 C267 129 253 125 235 128 C202 134 165 134 132 128 C114 125 100 129 88 143 L55 180 C41 196 26 187 22 165 C16 133 25 94 50 62Z"/><path d="M87 91 h54 M114 64 v54"/><circle cx="269" cy="73" r="11"/><circle cx="301" cy="91" r="11"/><circle cx="269" cy="109" r="11"/><circle cx="237" cy="91" r="11"/><circle cx="166" cy="83" r="27"/><circle cx="236" cy="83" r="27"/><path class="hot-dot" d="M113 158 q12 -10 24 0"/><path class="hot-dot" d="M275 158 q12 -10 24 0"/></g>
+      <g class="leader-lines"><path d="M180 120 C120 90 67 80 15 70"/><path d="M355 106 C405 83 447 78 508 70"/><path d="M300 192 C363 211 425 216 505 208"/><path d="M135 192 C94 211 54 216 12 208"/></g>
+      <g class="callout"><text x="8" y="66">L3 · SPRINT</text><text x="400" y="66">R2 · FIRE</text><text x="415" y="211">✕ · JUMP</text><text x="8" y="211">L2 · AIM</text></g>
+    </svg></div>
+    <div class="control-row"><span class="key-pill">L2</span><span>AIM / BLOCK</span><span class="key-pill">R2</span><span>FIRE</span></div>
+    <div class="control-row"><span class="key-pill">L3</span><span>SPRINT</span><span class="key-pill">○</span><span>SLIDE / DASH</span></div>
+    <div class="control-row"><span class="key-pill">✕</span><span>JUMP</span><span class="key-pill">□</span><span>RELOAD</span></div>
+  </div>
+</div>
+<div class="control-footer"><span>WASD / STICKS TO MOVE</span><span>•</span><span>SPACE / ✕ TO JUMP</span><span>•</span><span>CLICK OR PRESS TO START</span></div>`;
+
 export const CONTROLS_HTML = `
 <div class="cols">
   <div><div class="colhead">鼠标 + 键盘</div>
