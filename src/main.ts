@@ -372,9 +372,7 @@ function loop(t:number) {
     }
   }
 
-  if(levelPhase==='objective' && objectiveCrates>=5 && !enemies.length) {
-    wave=10; spawnBoss();
-  }
+  if(levelPhase==='objective' && objectiveCrates>=5 && !enemies.length) { wave=10; spawnBoss(); }
 
   for(const e of [...enemies]) {
     const d=camera.position.clone().sub(e.m.position); d.y=0;
