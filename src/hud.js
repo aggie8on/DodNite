@@ -133,7 +133,7 @@ export const CONTROLS_HTML = `
     <div>press again in air <b>Space</b> = Double Jump</div>
     <div><b>C / Ctrl</b> Ground Slide · Air Dash</div>
     <div><b>Q / E</b> Grapple：Tap to swing，Hold to reel in，JumpLaunch</div>
-    <div><b>F</b> Katana快速Slash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
+    <div><b>F</b> KatanaSlash &nbsp; <b>R</b> Reload &nbsp; <b>M</b> Music</div>
     <div><b>G</b> Grenades · Hold to throw farther</div>
     <div><b>Tab</b> Scoreboard（Online） &nbsp; <b>Esc</b> Pause</div>
     <div><b>Press both mouse buttons</b> Dash slash when full</div>
@@ -145,7 +145,7 @@ export const CONTROLS_HTML = `
     <div><b>✕</b> Jump &nbsp; <b>○</b> Slide · Air Dash</div>
     <div><b>L1</b> Grapple（Hold to reel in，✕ Launch）</div>
     <div><b>L2 + R2</b> KatanaDash slash when full</div>
-    <div><b>R1</b> Katana快速Slash，then auto-switch back to guns</div>
+    <div><b>R1</b> KatanaSlash，then auto-switch back to guns</div>
     <div><b>□</b> Reload &nbsp; <b>△</b> Next weapon</div>
     <div><b>R3 / D-pad Up</b> Grenades · Hold to throw farther</div>
     <div><b>Create</b> Scoreboard（Online） &nbsp; <b>Options</b> Pause</div>
