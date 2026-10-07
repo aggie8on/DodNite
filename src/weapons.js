@@ -80,7 +80,7 @@ export class Gun extends ViewModel {
   addAmmo(n) { this.reserve = Math.min(this.reserve + n, this.maxReserve); }
   startReload() {
     if (this.reloading || this.mag >= this.magSize || this.reserve <= 0) return;
-    this.reloading = true; this.reloadT = 0; this.racked = false;
+    this.reloading = true; this.reloadT = 0; this.racked = false; this.burstRemaining = 0;
     if (this.reloadType === 'shells') audio.shell(); else if (this.reloadType === 'cylinder') audio.cylinder(); else audio.reload();
   }
   update(dt, st) {
