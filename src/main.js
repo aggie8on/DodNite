@@ -213,7 +213,7 @@ const ROSTER = [
 ];
 const MODIFIERS = [
   { name: '', apply: () => { enemies.mods.speed = 1; enemies.mods.damage = 1; } },
-  { name: 'Caffeine · Move更快', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
+  { name: 'Caffeine · Move', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
   { name: 'Heavy Ink · Deal more damage', apply: () => { enemies.mods.speed = 0.9; enemies.mods.damage = 1.4; } },
   { name: 'Swarm · More enemies、Weaker enemies', apply: () => { enemies.mods.speed = 1.15; enemies.mods.damage = 0.9; } },
 ];
@@ -221,11 +221,11 @@ const tips = () => [
   `Hold <b>${hud.key('grapple')}</b> Reel in · Press again while swinging to release`,
   `Use <b>${hud.key('block')}</b> Block，Some bullets reflect back`,
   'Air kills score higher · Stay airborne',
-  `<b>${hud.key('grenade')}</b> 掷出Grenades · 拾取物可补充Grenades`,
-  `在press again in air一次 <b>${hud.key('jump')}</b> 可Double Jump`,
+  `<b>${hud.key('grenade')}</b> Grenades · Grenades`,
+  `press again in air <b>${hud.key('jump')}</b> Double Jump`,
 ];
 const bossFor = (n) => BOSSES[(Math.floor(n / 5) - 1) % BOSSES.length];
-const enemyName = (t) => ({ boss: 'Doodle魔王', eraser: 'Eraser King', inkblot: 'Ink King' })[t] || t.toUpperCase();
+const enemyName = (t) => ({ boss: 'Doodle', eraser: 'Eraser King', inkblot: 'Ink King' })[t] || t.toUpperCase();
 function startWave(n) {
   game.wave = n; game.queue = []; game.spawnT = 2; game.intermission = 0; game.boss = null; hud.setBoss(null, null);
   const boss = n > 0 && n % 5 === 0;
@@ -240,7 +240,7 @@ function startWave(n) {
   const total = pool.reduce((a, r) => a + r.w, 0);
   for (let i = 0; i < count; i++) { let r = Math.random() * total, t = pool[0].t; for (const c of pool) { r -= c.w; if (r <= 0) { t = c.t; break; } } game.queue.push(t); }
   if (boss) { hud.message('Wave  ' + n + '  waves', enemyName(bossFor(n)) + ' Incoming', 3); audio.bossRoar(player.center); }
-  else hud.message('Wave  ' + n + '  waves', n === 1 ? 'They are crawling onto the page' : mod.name || choose(['画得更Use力些', 'Keep doodling', 'Stay off the ground', 'Use the blade', 'Reflect the bullets']), 2.6);
+  else hud.message('Wave  ' + n + '  waves', n === 1 ? 'They are crawling onto the page' : mod.name || choose(['Use', 'Keep doodling', 'Stay off the ground', 'Use the blade', 'Reflect the bullets']), 2.6);
   audio.wave();
   if (n <= tips().length) hud.tip(tips()[n - 1], 7);
   player.grenades = Math.min(player.maxGrenades, player.grenades + 1);
@@ -264,7 +264,7 @@ function pickSpawn(type) {
 }
 function updateWaves(dt) {
   if (game.intermission > 0) {
-    game.intermission -= dt; hud.setTimer('下一 waves还有 ' + Math.ceil(game.intermission) + '  sec');
+    game.intermission -= dt; hud.setTimer(' waves ' + Math.ceil(game.intermission) + '  sec');
     if (game.intermission <= 0) { hud.setTimer(''); startWave(game.wave + 1); }
     return;
   }
@@ -276,7 +276,7 @@ function updateWaves(dt) {
     }
   }
   if (!game.queue.length && enemies.alive === 0) {
-    game.intermission = 8; hud.message('Wave  ' + game.wave + '  waves已清除', 'Catch your breath · +' + 200 * game.wave, 2.5);
+    game.intermission = 8; hud.message('Wave  ' + game.wave + '  waves', 'Catch your breath · +' + 200 * game.wave, 2.5);
     game.addScore(200 * game.wave, null); audio.waveClear(); player.hp = Math.min(player.maxHp, player.hp + 40);
   }
   hud.setWave(game.wave, enemies.alive + game.queue.length);
@@ -340,7 +340,7 @@ function updateFocusDash(dt) {
   if (moved < 1e-4 && want > 0.05 && (d.stuckY || 0) > 0.08) { endDash(true); return true; }
   return false;
 }
-function endDash(blocked) { player.dashLock = false; game.focus.dash = null; player.body.vel.set(0, 0, 0); if (blocked) { player.weapons[player.katanaIndex].startSlash(player._weaponState(false, false, 0)); audio.katanaSwing(); hud.tip('Blocked · Dash没能命中', 1.2); } }
+function endDash(blocked) { player.dashLock = false; game.focus.dash = null; player.body.vel.set(0, 0, 0); if (blocked) { player.weapons[player.katanaIndex].startSlash(player._weaponState(false, false, 0)); audio.katanaSwing(); hud.tip('Blocked · Dash', 1.2); } }
 function focusExecute(target) {
   player.dashLock = false; game.focus.dash = null; player.body.vel.set(0, 0, 0);
   player.weapons[player.katanaIndex].startSlash(player._weaponState(false, false, 0));
@@ -421,8 +421,8 @@ function checkWin() {
 }
 function endMatch(winner) {
   game.over = winner; game.overT = 0; game.state = 'over'; endFocus(); input.exitLock(); hud.setBoard(null);
-  const title = winner.id === net.id ? 'You赢了' : (winner.name || 'Someone') + ' wins';
-  hud.setGameplayVisible(false); hud.showScreen(`<h1>${title}</h1><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div><div class="go" id="overGo">马上BackLobby…</div>`);
+  const title = winner.id === net.id ? 'You' : (winner.name || 'Someone') + ' wins';
+  hud.setGameplayVisible(false); hud.showScreen(`<h1>${title}</h1><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div><div class="go" id="overGo">BackLobby…</div>`);
 }
 
 // ---------------- networking ----------------
@@ -437,7 +437,7 @@ function lobbyRows() { return [...lobby.players.entries()].map(([id, p]) => ({ i
 function broadcastLobby() { net.send('lobby', { players: lobbyRows(), hostId: net.id, isPublic: lobby.isPublic, map: lobby.map || mapKey, shown: net.aliasCode || net.code }); renderLobby(); }
 const inMatch = () => ['play', 'dying', 'over'].includes(game.state);
 net.onPeerLeave = (id) => { const nm = (lobby.players.get(id) || {}).name; removeRemote(id); broadcastLobby(); if (inMatch()) { hud.kill((nm || 'Someone') + ' left', 0); sendScores(); } };
-net.onDisconnect = () => { if (lobby.order && lobby.order.some((id) => id !== lobby.hostId)) migrateHost(); else leaveOnline('房主leftLobby'); };
+net.onDisconnect = () => { if (lobby.order && lobby.order.some((id) => id !== lobby.hostId)) migrateHost(); else leaveOnline('leftLobby'); };
 // ---- host transfer: when the host goes, the earliest-joined player left takes over on a generation
 // code (the old code is slow to free up on the signalling server); everyone else rejoins there
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -446,14 +446,14 @@ async function migrateHost() { if (migrating) return; migrating = true; try { aw
 async function _migrateHost() {
   const oldHost = lobby.hostId, myId = net.id; const gen = (lobby.gen || 0) + 1; lobby.gen = gen;
   const base = (lobby.code || net.code || '').replace(/-\d+$/, ''); const code = base + '-' + gen;
-  const roster = (lobby.order || []).filter((id) => id !== oldHost && lobby.players.has(id)); if (!roster.length || !base) { leaveOnline('房主leftLobby'); return; }
+  const roster = (lobby.order || []).filter((id) => id !== oldHost && lobby.players.has(id)); if (!roster.length || !base) { leaveOnline('leftLobby'); return; }
   const successor = roster[0]; const wasInMatch = inMatch();
   if (oldHost) { const r = remote.get(oldHost); if (r) r.dispose(); remote.delete(oldHost); lobby.players.delete(oldHost); scores.delete(oldHost); }
-  hud.message('房主left', successor === myId ? '现在由You担任房主' : 'Migrating to new host…', 2.6);
+  hud.message('left', successor === myId ? 'You' : 'Migrating to new host…', 2.6);
   if (successor === myId) {
     let ok = false;
     for (let tries = 0; tries < 2 && !ok; tries++) { try { await net.host({ isPublic: lobby.isPublic, code }); ok = true; } catch (e) { await sleep(800); } }
-    if (!ok) { leaveOnline('无法接管Lobby'); return; }
+    if (!ok) { leaveOnline('Lobby'); return; }
     const mine = lobby.players.get(myId) || { name: myName }; lobby.players.delete(myId); lobby.players.set(net.id, mine);
     const ms = scores.get(myId); scores.delete(myId); if (ms) scores.set(net.id, ms);
     lobby.hostId = net.id; lobby.code = code; lobby.order = [net.id, ...roster.filter((id) => id !== myId)]; net.accepting = true; game.clockStarted = clockRunning || matchLeft < FFA_TIME;
@@ -502,7 +502,7 @@ net.on('pdead', (d, from) => {
   if (r) { r.ragdoll(d.dir ? new THREE.Vector3().fromArray(d.dir) : null, !!d.over); audio.enemyDie(r.center); }
   const how = d.how ? ' · ' + d.how + (d.crit ? ' Headshot' : '') : '';
   if (d.killer === net.id) { game.kills++; game.addScore(100, 'erased ' + vn + how); audio.kill(true); }
-  else hud.kill(kn ? kn + ' erased了 ' + vn + how : vn + ' Fell off the page', 0);
+  else hud.kill(kn ? kn + ' erased ' + vn + how : vn + ' Fell off the page', 0);
   if (net.isHost) tallyDeath(from, d.killer);
 });
 net.on('nade', (d) => player.throwGrenade(d));
@@ -515,13 +515,13 @@ net.on('shots', (d, from) => {
   for (let i = 0; i + 2 < e.length; i += 3) { _se.set(e[i], e[i + 1], e[i + 2]); effects.tracer(_sm, _se, INK.BLUE, th, 0.06); }
   r.flash(); audio.remoteShot(d.k, _sm);
 });
-net.on('cut', () => { if (player.grapple.state !== 'idle') { player.detachGrapple(false); effects.strokeBurst(player.center, INK.ORANGE, 8, 4, { life: 0.25, size: 0.03 }); hud.tip('You的绳索was割断了', 1.3); input.rumble(0.5, 0.3, 80); } });
+net.on('cut', () => { if (player.grapple.state !== 'idle') { player.detachGrapple(false); effects.strokeBurst(player.center, INK.ORANGE, 8, 4, { life: 0.25, size: 0.03 }); hud.tip('Youwas', 1.3); input.rumble(0.5, 0.3, 80); } });
 net.on('score', (rows) => { if (!net.isHost) applyScores(rows); });
 net.on('fell', (d, from) => { if (!net.isHost) return; const sc = scores.get(from); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' Fell off the page · -1' }); hud.kill(sc.name + ' Fell off the page · -1', 0); } });
 net.on('feed', (d) => hud.kill(String(d.text || ''), 0));
 player.onFall = () => {
   if (!online() || !inMatch()) return;
-  hud.kill('Fell off the page · 击kills -1', 0);
+  hud.kill('Fell off the page · kills -1', 0);
   if (net.isHost) { const sc = scores.get(net.id); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' Fell off the page · -1' }); } }
   else net.send('fell', {});
 };
@@ -537,13 +537,13 @@ function idleUpdate(dt) {
   const othersActive = [...remote.values()].some((r) => !r.idle);
   // a host that still has active players stays; kicking it would end their match
   const canDrop = !net.isHost || !othersActive;
-  if (idle > limit - IDLE_WARN && !idleWarned && canDrop) { idleWarned = true; hud.message('Still there?？', 'Move around，否则会因挂机was移出', 3); audio.empty(); }
+  if (idle > limit - IDLE_WARN && !idleWarned && canDrop) { idleWarned = true; hud.message('Still there?？', 'Move around，was', 3); audio.empty(); }
   if (idle <= limit - IDLE_WARN) idleWarned = false;
-  if (idle > limit && canDrop) { const back = net.isHost ? null : String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(net.isHost ? 'Lobby已关闭：Everyone idle' : '因挂机was移出'); lobby.rejoinCode = back; if (back) showStart(); return; }
+  if (idle > limit && canDrop) { const back = net.isHost ? null : String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(net.isHost ? 'Lobby：Everyone idle' : 'was'); lobby.rejoinCode = back; if (back) showStart(); return; }
   // the host also clears out a client that has sat idle past the limit, in case its tab cannot do it itself
-  if (net.isHost) for (const [id, r] of remote) if (r.idle && r.idleSince && performance.now() / 1000 - r.idleSince > limit - IDLE_FLAG + 15) { net.sendTo(id, 'kick', { reason: '因挂机was移出' }); const c = net.conns.get(id); setTimeout(() => { try { c && c.close(); } catch (e) { /* ignore */ } }, 500); }
+  if (net.isHost) for (const [id, r] of remote) if (r.idle && r.idleSince && performance.now() / 1000 - r.idleSince > limit - IDLE_FLAG + 15) { net.sendTo(id, 'kick', { reason: 'was' }); const c = net.conns.get(id); setTimeout(() => { try { c && c.close(); } catch (e) { /* ignore */ } }, 500); }
 }
-net.on('kick', (d) => { const back = String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(d && d.reason || 'was移出'); lobby.rejoinCode = back; if (back) showStart(); });
+net.on('kick', (d) => { const back = String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(d && d.reason || 'was'); lobby.rejoinCode = back; if (back) showStart(); });
 let syncTick = 0;
 function netUpdate(dt) {
   idleUpdate(dt);
@@ -564,7 +564,7 @@ function leaveOnline(reason) {
   game.menu = false; lobby.status = reason || ''; screen = 'online'; showStart();
 }
 async function createLobby(isPublic) {
-  setStatus('正在创建Lobby…');
+  setStatus('Lobby…');
   try { await net.host({ isPublic }); }
   catch (err) { setStatus(friendlyError(err)); unlockButtons(); return; }
   lobby.isPublic = isPublic; lobby.map = mapKey; lobby.players.clear(); lobby.players.set(net.id, { name: myName }); lobby.hostId = net.id; lobby.status = '';
@@ -578,17 +578,17 @@ async function joinLobby(code) {
 async function quickPlay() {
   try { await net.quickJoin({ name: myName }, setStatus); lobby.isPublic = true; lobby.status = ''; game.state = 'lobby'; screen = 'lobby'; showStart(); return; }
   catch (err) { if (!/no open public/.test(String(err.message))) { setStatus(friendlyError(err)); unlockButtons(); return; } }
-  setStatus('暂无开放的Lobby · 正在为You开一个PublicLobby…');
+  setStatus('Lobby · YouPublicLobby…');
   await createLobby(true);
 }
 function friendlyError(err) {
   const m = String(err && err.message || err || ''); if (!m) return 'Something went wrong';
-  if (/networking library/.test(m)) return '无法加载Online库 · Check your network and refresh the page';
-  if (/timed out|signalling/.test(m)) return 'Could not connect to matchmaking server · 请检查You的网络';
-  if (/no lobby with that code/.test(m)) return '找不到该Code对应的Lobby · Check the code with your friend';
-  if (/no answer/.test(m)) return '找到了Lobby但无法连接 · You们中可能Someone处于阻止直连的网络';
-  if (/full/.test(m)) return '该LobbyFull · Try another code';
-  if (/leave the lobby/.test(m)) return '请先LeaveYou当前的Lobby';
+  if (/networking library/.test(m)) return 'Online · Check your network and refresh the page';
+  if (/timed out|signalling/.test(m)) return 'Could not connect to matchmaking server · You';
+  if (/no lobby with that code/.test(m)) return 'CodeLobby · Check the code with your friend';
+  if (/no answer/.test(m)) return 'Lobby · YouSomeone';
+  if (/full/.test(m)) return 'LobbyFull · Try another code';
+  if (/leave the lobby/.test(m)) return 'LeaveYouLobby';
   return m;
 }
 function setStatus(t) { lobby.status = t; const el = hud.el.panel.querySelector('#status'); if (el) el.textContent = t; }
@@ -596,8 +596,8 @@ function setStatus(t) { lobby.status = t; const el = hud.el.panel.querySelector(
 // ---------------- screens ----------------
 function settingsHTML() {
   return `<div class="settings" id="settings">
-    <label>Mouse灵敏度 <input type="range" id="setSens" min="25" max="250" step="5" value="${settings.sens}"><b id="setSensV">${settings.sens}%</b></label>
-    <label><input type="checkbox" id="setInv" ${settings.invert ? 'checked' : ''}> 反转垂直Look</label>
+    <label>Mouse <input type="range" id="setSens" min="25" max="250" step="5" value="${settings.sens}"><b id="setSensV">${settings.sens}%</b></label>
+    <label><input type="checkbox" id="setInv" ${settings.invert ? 'checked' : ''}> Look</label>
     <label><input type="checkbox" id="setMus" ${musicWanted ? 'checked' : ''}> Music <span class="k">(M)</span></label>
   </div>`;
 }
@@ -626,21 +626,21 @@ function wireMap(onPick) { const box = hud.el.panel.querySelector('#mapsel'); if
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function mainHTML() {
-  return `<h1>Doodle District</h1><h2>一款Doodle风生存射击游戏</h2>
-    <div class="mainbtns"><button type="button" class="start" id="soloBtn">Start Game<i>Solo · 抵御一 waves waves敌人</i></button><button type="button" id="onlineBtn">Online Match<i>Free-for-all · up to 10 players</i></button></div>
+  return `<h1>Doodle District</h1><h2>Doodle</h2>
+    <div class="mainbtns"><button type="button" class="start" id="soloBtn">Start Game<i>Solo ·  waves waves</i></button><button type="button" id="onlineBtn">Online Match<i>Free-for-all · up to 10 players</i></button></div>
     ${mapHTML(mapKey, true)}${START_CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">Best score：${best}</div>` : ''}`;
 }
 function onlineHTML() {
   return `<h1>Online Match</h1><h2>Free-for-all · First to ${FFA_TARGET} kills · up to 10 players</h2>
     <div class="online" id="online">
-      <div class="row"><span>You的昵称</span><input type="text" class="namebox" id="setName" maxlength="14" value="${esc(myName)}"></div>
-      <div class="row"><button type="button" class="big" id="quickBtn">Quick Match</button><span class="hint">自动Join开放的PublicLobby；没有的话就为You开一个</span></div>
+      <div class="row"><span>You</span><input type="text" class="namebox" id="setName" maxlength="14" value="${esc(myName)}"></div>
+      <div class="row"><button type="button" class="big" id="quickBtn">Quick Match</button><span class="hint">JoinPublicLobby；You</span></div>
       <div class="row split"><span>or</span></div>
-      <div class="row"><button type="button" id="createBtn">创建Lobby</button><div class="radio"><label><input type="radio" name="vis" value="public" ${lobby.isPublic ? 'checked' : ''}> Public</label><label><input type="radio" name="vis" value="private" ${lobby.isPublic ? '' : 'checked'}> Private · Friends only</label></div></div>
-      <div class="row"><span>有LobbyCode？</span><input type="text" id="codeBox" placeholder="Code" maxlength="5" autocomplete="off"><button type="button" id="joinBtn">Join</button></div>
+      <div class="row"><button type="button" id="createBtn">Lobby</button><div class="radio"><label><input type="radio" name="vis" value="public" ${lobby.isPublic ? 'checked' : ''}> Public</label><label><input type="radio" name="vis" value="private" ${lobby.isPublic ? '' : 'checked'}> Private · Friends only</label></div></div>
+      <div class="row"><span>LobbyCode？</span><input type="text" id="codeBox" placeholder="Code" maxlength="5" autocomplete="off"><button type="button" id="joinBtn">Join</button></div>
       <div class="lobbylist" id="lobbylist"><div class="row"><span>PublicLobby</span><button type="button" class="alt" id="refreshBtn">Refresh</button></div><div class="rows" id="lobbyRows">${lobbyListHTML()}</div></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div>
-      ${lobby.rejoinCode ? `<div class="row"><button type="button" class="big" id="rejoinBtn">重新Join ${esc(lobby.rejoinCode)}</button></div>` : ''}
+      ${lobby.rejoinCode ? `<div class="row"><button type="button" class="big" id="rejoinBtn">Join ${esc(lobby.rejoinCode)}</button></div>` : ''}
       <div class="row"><button type="button" class="alt" id="backBtn">Back</button></div>
     </div>`;
 }
@@ -650,18 +650,18 @@ function lobbyHTML() {
     <div class="online" id="online">
       <div class="row"><span>Code</span><span class="code">${String(net.isHost ? (net.aliasCode || net.code) : (lobby.shown || net.code) || '').replace(/-\d+$/, '')}</span></div>
       ${mapHTML(lobby.map || mapKey, host)}
-      <div class="hint">${lobby.isPublic ? '该Lobby为Public：任何人都可通过Quick Matchor输入CodeJoin' : 'PrivateLobby：Friends can join via「Online Match → Join」中输入此Code'}</div>
+      <div class="hint">${lobby.isPublic ? 'LobbyPublic：Quick MatchorCodeJoin' : 'PrivateLobby：Friends can join via「Online Match → Join」Code'}</div>
       <div class="plist">${rows.map((p) => `<div class="${p.id === lobby.hostId ? 'host' : ''}${p.id === net.id ? ' me' : ''}"><span>${esc(p.name)}</span><span>${p.id === net.id ? 'You' : ''}</span></div>`).join('')}</div>
       <div class="row"><button type="button" class="big" id="startBtn">Start Match</button><button type="button" class="alt" id="leaveBtn">Leave</button></div>
-      <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? '开局后仍可中途Join' : n + ' players已就位'}</div>
+      <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? 'Join' : n + ' players'}</div>
     </div>`;
 }
 let lobbyList = null, listBusy = false;
 function lobbyListHTML() {
   if (listBusy) return '<div class="hint">Searching…</div>';
-  if (!lobbyList) return '<div class="hint">Click「Refresh」查找开放的Lobby</div>';
-  if (!lobbyList.length) return '<div class="hint">Click「Quick Match」即可JoinLobby</div>';
-  return lobbyList.map((l) => `<div class="lobbyrow"><span class="code">${esc(l.code)}</span><span>${esc(l.hostName || 'Someone')} 的Lobby</span><span>${l.players}/${l.max}${l.inMatch ? ' · in match' : ''}</span>${l.full ? '<span class="status">Full</span>' : `<button type="button" data-join="${esc(l.code)}">Join</button>`}</div>`).join('');
+  if (!lobbyList) return '<div class="hint">Click「Refresh」Lobby</div>';
+  if (!lobbyList.length) return '<div class="hint">Click「Quick Match」JoinLobby</div>';
+  return lobbyList.map((l) => `<div class="lobbyrow"><span class="code">${esc(l.code)}</span><span>${esc(l.hostName || 'Someone')} Lobby</span><span>${l.players}/${l.max}${l.inMatch ? ' · in match' : ''}</span>${l.full ? '<span class="status">Full</span>' : `<button type="button" data-join="${esc(l.code)}">Join</button>`}</div>`).join('');
 }
 async function refreshLobbies() {
   if (listBusy || net.active) return; listBusy = true; const box = hud.el.panel.querySelector('#lobbyRows'); if (box) box.innerHTML = lobbyListHTML();
@@ -674,7 +674,7 @@ function wireOnline() {
   const q = (id) => box.querySelector('#' + id); wireName(box);
   if (q('quickBtn')) q('quickBtn').addEventListener('click', () => { lockButtons(box); quickPlay(); });
   if (q('createBtn')) q('createBtn').addEventListener('click', () => { lockButtons(box); createLobby(box.querySelector('input[name=vis]:checked').value === 'public'); });
-  if (q('joinBtn')) { q('joinBtn').addEventListener('click', () => { const c = q('codeBox').value.trim().toUpperCase(); if (!c) { setStatus('请输入好友给You的LobbyCode'); return; } lockButtons(box); joinLobby(c); }); q('codeBox').addEventListener('keydown', (e) => { if (e.key === 'Enter') q('joinBtn').click(); }); }
+  if (q('joinBtn')) { q('joinBtn').addEventListener('click', () => { const c = q('codeBox').value.trim().toUpperCase(); if (!c) { setStatus('YouLobbyCode'); return; } lockButtons(box); joinLobby(c); }); q('codeBox').addEventListener('keydown', (e) => { if (e.key === 'Enter') q('joinBtn').click(); }); }
   if (q('rejoinBtn')) q('rejoinBtn').addEventListener('click', () => { const c = lobby.rejoinCode; lobby.rejoinCode = null; lockButtons(box); joinLobby(c); });
   if (q('backBtn')) q('backBtn').addEventListener('click', () => { lobby.status = ''; lobby.rejoinCode = null; screen = 'main'; showStart(); });
   if (q('refreshBtn')) { q('refreshBtn').addEventListener('click', () => refreshLobbies()); if (!lobbyList && !listBusy) refreshLobbies(); }
@@ -700,19 +700,19 @@ function showStart() {
 }
 function showPause() {
   if (online()) {
-    hud.showScreen(`<h1>Menu</h1><h2>Free-for-all · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Leave对战</button></div></div><div class="go">Click任意位置（orpress ${hud.key('confirm')}）to continue</div>`);
+    hud.showScreen(`<h1>Menu</h1><h2>Free-for-all · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Leave</button></div></div><div class="go">Click（orpress ${hud.key('confirm')}）to continue</div>`);
     wireSettings(); wireOnline(); return;
   }
-  hud.showScreen(`<h1>已Pause</h1><h2>Wave  ${game.wave}  waves · 得分 ${game.score}</h2>${CONTROLS_HTML}${settingsHTML()}${menuBtnHTML()}<div class="go">Click任意位置（orpress ${hud.key('confirm')}）Continue</div>`);
+  hud.showScreen(`<h1>Pause</h1><h2>Wave  ${game.wave}  waves ·  ${game.score}</h2>${CONTROLS_HTML}${settingsHTML()}${menuBtnHTML()}<div class="go">Click（orpress ${hud.key('confirm')}）Continue</div>`);
   wireSettings(); wireMenuBtn();
 }
-function showClickToPlay() { hud.showScreen(`<h1>Match started</h1><h2>Free-for-all · First to ${FFA_TARGET} kills</h2><div class="go">Click任意位置（orpress ${hud.key('confirm')}）to begin</div>`); }
+function showClickToPlay() { hud.showScreen(`<h1>Match started</h1><h2>Free-for-all · First to ${FFA_TARGET} kills</h2><div class="go">Click（orpress ${hud.key('confirm')}）to begin</div>`); }
 function showDead() {
   hud.setGameplayVisible(false); const nb = game.score > best; if (nb) { best = game.score; localStorage.setItem('doodle_best', String(best)); }
-  hud.showScreen(`<h1>waserased</h1><div class="stats">You撑过了 <b>${game.wave}</b>  waves · <b>${game.kills}</b> 次击kills · 得分 <b>${game.score}</b>${nb ? ' · <b>New record</b>' : ` · Best score ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Click（orpress ${hud.key('confirm')}）Draw again</div>`);
+  hud.showScreen(`<h1>waserased</h1><div class="stats">You <b>${game.wave}</b>  waves · <b>${game.kills}</b> kills ·  <b>${game.score}</b>${nb ? ' · <b>New record</b>' : ` · Best score ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Click（orpress ${hud.key('confirm')}）Draw again</div>`);
   wireCheckpoints((w) => beginAtWave(w)); wireMenuBtn();
 }
-function menuBtnHTML() { return '<div class="online menubtn"><div class="row"><button type="button" class="alt" id="menuBtn">主Menu</button></div></div>'; }
+function menuBtnHTML() { return '<div class="online menubtn"><div class="row"><button type="button" class="alt" id="menuBtn">Menu</button></div></div>'; }
 function wireMenuBtn() { const b = hud.el.panel.querySelector('#menuBtn'); if (b) b.addEventListener('click', (e) => { e.stopPropagation(); toMainMenu(); }); }
 function toMainMenu() { game.state = 'start'; game.mode = 'solo'; game.menu = false; setArena(false); resetGame(); audio.reelLoop(false); input.exitLock(); hud.setGameplayVisible(false); screen = 'main'; showStart(); }
 function toLobbyScreen() { net.inMatch = false; for (const r of remote.values()) r.lastSeen = performance.now(); setArena(true); resetGame(); game.state = 'lobby'; game.over = null; game.menu = false; hud.setGameplayVisible(false); hud.setBoard(null); screen = 'lobby'; showStart(); }
@@ -742,8 +742,8 @@ function startMatch(late, spawnIdx) {
   for (const r of remote.values()) r.lastSeen = performance.now();
   if (!scores.size) for (const [id, p] of lobby.players) scores.set(id, { name: p.name, kills: 0, deaths: 0 });
   const spots = spawnSpots(); player.reset(spawnIdx != null && spots[spawnIdx] ? spots[spawnIdx].clone() : arenaSpawn()); beginCommon(); game.state = 'play'; screen = 'lobby'; player.shieldT = 2;
-  refreshScoreHud(); hud.message('Free-for-all', late ? 'Youjoined一场进行中的对战' : 'First to ' + FFA_TARGET + ' kills · ' + Math.round(FFA_TIME / 60) + ' minutes · Everyone is a target', 3);
-  hud.tip(`Hold <b>${hud.key('score')}</b> 查看Scoreboard`, 5);
+  refreshScoreHud(); hud.message('Free-for-all', late ? 'Youjoined' : 'First to ' + FFA_TARGET + ' kills · ' + Math.round(FFA_TIME / 60) + ' minutes · Everyone is a target', 3);
+  hud.tip(`Hold <b>${hud.key('score')}</b> Scoreboard`, 5);
   // a match started by someone else's click cannot grab the mouse: ask for a click
   setTimeout(() => { if (game.state === 'play' && !input.pointerLocked && !input.usingGamepad) { game.menu = true; showClickToPlay(); } }, 250);
 }
@@ -780,12 +780,12 @@ function step(now) {
   if (st === 'start' || st === 'pause' || st === 'dead' || st === 'over') { if (input.pressed('jump') || input.pressed('confirm') || (st === 'pause' && input.pressed('pause'))) hud.onScreenClick(); }
   else if ((st === 'play' || (st === 'dying' && online())) && input.pressed('pause')) { if (game.menu) resume(); else { pause(); input.exitLock(); } }
   else if ((st === 'play' || st === 'dying') && game.menu && (input.pressed('jump') || input.pressed('confirm'))) resume();
-  if (input.pressed('music')) { musicWanted = !musicWanted; localStorage.setItem('doodle_music', musicWanted ? '1' : '0'); audio.musicOn(musicWanted); hud.tip(musicWanted ? 'Music已开启' : 'Music已关闭', 1.5); }
+  if (input.pressed('music')) { musicWanted = !musicWanted; localStorage.setItem('doodle_music', musicWanted ? '1' : '0'); audio.musicOn(musicWanted); hud.tip(musicWanted ? 'Music' : 'Music', 1.5); }
   if (online() && playing) {
     if (input.usingGamepad && input.pressed('score')) boardToggle = !boardToggle;
     const want = ((input.down('score') && !input.usingGamepad) || boardToggle) && !game.menu; if (want !== !hud.el.board.hidden) hud.setBoard(want ? boardHTML() : null);
   } else boardToggle = false;
-  if (st === 'play' && !game.menu && !input.pointerLocked && !input.usingGamepad) { lockTipT -= dt; if (lockTipT <= 0) { lockTipT = 2.5; hud.tip('Click画面以锁定Mouse', 2); } }
+  if (st === 'play' && !game.menu && !input.pointerLocked && !input.usingGamepad) { lockTipT -= dt; if (lockTipT <= 0) { lockTipT = 2.5; hud.tip('ClickMouse', 2); } }
   let scale = 1;
   if (game.hitstopT > 0) { game.hitstopT -= dt; scale = game.hitstopScale; }
   else if (game.focus.active) scale = FOCUS_SCALE;
@@ -807,7 +807,7 @@ function step(now) {
         else if (before > 0) { game.respawnArm = input.lastActive; game.promptT = 0; }
         else if (!game.menu) {
           // waiting on a press: any key, button or click brings you back; pause opens the menu instead
-          game.promptT -= dt; if (game.promptT <= 0) { game.promptT = 1.4; hud.message('Ready', `press ${hud.key('confirm')} · 任意press键orClick即可重生`, 1.5); }
+          game.promptT -= dt; if (game.promptT <= 0) { game.promptT = 1.4; hud.message('Ready', `press ${hud.key('confirm')} · pressorClick`, 1.5); }
           if (input.lastActive !== game.respawnArm && !input.pressed('pause') && !input.down('pause')) respawnLocal();
         }
       }
