@@ -156,7 +156,7 @@ function breakProp(br, dir, local, quiet = false) {
   if (br.kind === 'pinata') {
     for (const ink of [INK.PINK, INK.ORANGE, INK.GREEN]) effects.strokeBurst(pos, ink, 16, 7, { life: 0.7, size: 0.05 });
     effects.explosion(pos, 2.5, INK.PINK); if (!net.active || net.isHost) for (let i = 0; i < 2; i++) spawnPickup('health', pos.clone().add(new THREE.Vector3(rand(-1.2, 1.2), 0, rand(-1.2, 1.2))));
-    if (game.mode === 'solo') game.addScore(25, 'Piñata');
+    if (game.mode === 'solo') game.addScore(25, 'Target');
   } else if (br.kind === 'cactus') { effects.blood(pos, d, 1.4, { ink: INK.GREEN }); effects.bloodPool(new THREE.Vector3(pos.x, 0, pos.z), 1.1, INK.GREEN); }
   else { effects.strokeBurst(pos, br.ink, 12, 5, { life: 0.35, size: 0.04 }); effects.smoke(pos, up, 3); }
   audio.smash(pos, br.kind === 'barrel' || br.kind === 'crate' || br.kind === 'cactus');
@@ -213,15 +213,15 @@ const ROSTER = [
 ];
 const MODIFIERS = [
   { name: '', apply: () => { enemies.mods.speed = 1; enemies.mods.damage = 1; } },
-  { name: 'Caffeine · Move', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
-  { name: 'Heavy Ink · Deal more damage', apply: () => { enemies.mods.speed = 0.9; enemies.mods.damage = 1.4; } },
-  { name: 'Swarm · More enemies、Weaker enemies', apply: () => { enemies.mods.speed = 1.15; enemies.mods.damage = 0.9; } },
+  { name: 'Rush · Faster foes', apply: () => { enemies.mods.speed = 1.35; enemies.mods.damage = 0.85; } },
+  { name: 'Heavy Ink · Harder hits', apply: () => { enemies.mods.speed = 0.9; enemies.mods.damage = 1.4; } },
+  { name: 'Swarm · More foes, lighter hits', apply: () => { enemies.mods.speed = 1.15; enemies.mods.damage = 0.9; } },
 ];
 const tips = () => [
-  `Hold <b>${hud.key('grapple')}</b> Reel in · Press again while swinging to release`,
-  `Use <b>${hud.key('block')}</b> Block，Some bullets reflect back`,
-  'Air kills score higher · Stay airborne',
-  `<b>${hud.key('grenade')}</b> Grenades · Grenades`,
+  `Hold <b>${hud.key('grapple')}</b> to reel in · press again to release`,
+  `Use <b>${hud.key('block')}</b> to guard · some shots can return`,
+  'Air takedowns score more',
+  `<b>${hud.key('grenade')}</b> Grenades · hold to throw farther`,
   `press again in air <b>${hud.key('jump')}</b> Double Jump`,
 ];
 const bossFor = (n) => BOSSES[(Math.floor(n / 5) - 1) % BOSSES.length];
@@ -245,7 +245,7 @@ function startWave(n) {
   if (n <= tips().length) hud.tip(tips()[n - 1], 7);
   player.grenades = Math.min(player.maxGrenades, player.grenades + 1);
   for (let i = 0; i < 7; i++) spawnPickup(i < 5 ? 'ammo' : 'health', choose(level.pickups));
-  if (n >= 5 && n % 5 === 0 && n > checkpoint) { checkpoint = n; localStorage.setItem('doodle_checkpoint', String(n)); hud.kill('Checkpoint · Wave  ' + n + '  waves', 0); }
+  if (n >= 5 && n % 5 === 0 && n > checkpoint) { checkpoint = n; localStorage.setItem('doodle_checkpoint', String(n)); hud.kill('Checkpoint · Round ' + n, 0); }
 }
 function pickSpawn(type) {
   const spots = type === 'sniper' ? level.snipers : level.spawns; const pp = player.body.pos;
@@ -276,7 +276,7 @@ function updateWaves(dt) {
     }
   }
   if (!game.queue.length && enemies.alive === 0) {
-    game.intermission = 8; hud.message('Wave  ' + game.wave + '  waves', 'Catch your breath · +' + 200 * game.wave, 2.5);
+    game.intermission = 8; hud.message('Round ' + game.wave, 'Breathe · +' + 200 * game.wave, 2.5);
     game.addScore(200 * game.wave, null); audio.waveClear(); player.hp = Math.min(player.maxHp, player.hp + 40);
   }
   hud.setWave(game.wave, enemies.alive + game.queue.length);
@@ -387,7 +387,7 @@ function onLocalDeath() {
   if (net.isHost) tallyDeath(net.id, killer);
   game.respawnT = RESPAWN; game.state = 'dying'; game.deathT = 0;
   const kn = killer && scores.get(killer) ? scores.get(killer).name : null;
-  hud.kill(kn ? 'was ' + kn + ' erased' + (how ? ' · ' + how + (h.crit ? ' Headshot' : '') : '') : 'waserased', 0);
+  hud.kill(kn ? 'tagged by ' + kn + (how ? ' · ' + how + (h.crit ? ' Headshot' : '') : '') : 'Wiped Out', 0);
 }
 function respawnLocal() {
   player.reset(arenaSpawn()); player.name = myName; player.lastHitBy = null; player.lastHit = null; game.state = 'play'; player.shieldT = 2; hud.tip('Spawn protection · 2  sec', 1.6);
@@ -409,7 +409,7 @@ function refreshScoreHud() {
   hud.setModifier('');
   if (!hud.el.board.hidden) hud.setBoard(boardHTML());
 }
-function boardHTML(title = 'Free-for-all') {
+function boardHTML(title = 'Rival Rush') {
   const rows = sortedScores();
   return `<h3>${title}</h3>${rows.map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${s.name}${id === net.id ? ' (You)' : ''}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}<div class="foot">First to ${FFA_TARGET} kills · remaining ${mmss(matchLeft)} · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</div>`;
 }
@@ -464,7 +464,7 @@ async function _migrateHost() {
     await sleep(1200);
     const deadline = performance.now() + 20000; let joined = false;
     while (!joined && performance.now() < deadline) { try { await net.join(code, { name: myName, prev: myId }); joined = true; } catch (e) { await sleep(1200); } }
-    if (!joined) { leaveOnline('Host left，Match lost'); return; }
+    if (!joined) { leaveOnline('Host left · room closed'); return; }
     lobby.code = code; if (!wasInMatch) { game.state = 'lobby'; screen = 'lobby'; showStart(); }
   }
 }
@@ -521,7 +521,7 @@ net.on('fell', (d, from) => { if (!net.isHost) return; const sc = scores.get(fro
 net.on('feed', (d) => hud.kill(String(d.text || ''), 0));
 player.onFall = () => {
   if (!online() || !inMatch()) return;
-  hud.kill('Fell off the page · kills -1', 0);
+  hud.kill('Lost the line · points -1', 0);
   if (net.isHost) { const sc = scores.get(net.id); if (sc) { sc.kills = Math.max(0, sc.kills - 1); sendScores(); net.send('feed', { text: sc.name + ' Fell off the page · -1' }); } }
   else net.send('fell', {});
 };
@@ -537,13 +537,13 @@ function idleUpdate(dt) {
   const othersActive = [...remote.values()].some((r) => !r.idle);
   // a host that still has active players stays; kicking it would end their match
   const canDrop = !net.isHost || !othersActive;
-  if (idle > limit - IDLE_WARN && !idleWarned && canDrop) { idleWarned = true; hud.message('Still there?？', 'Move around，was', 3); audio.empty(); }
+  if (idle > limit - IDLE_WARN && !idleWarned && canDrop) { idleWarned = true; hud.message('Still there?', 'Move around to stay in', 3); audio.empty(); }
   if (idle <= limit - IDLE_WARN) idleWarned = false;
-  if (idle > limit && canDrop) { const back = net.isHost ? null : String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(net.isHost ? 'Lobby：Everyone idle' : 'was'); lobby.rejoinCode = back; if (back) showStart(); return; }
+  if (idle > limit && canDrop) { const back = net.isHost ? null : String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(net.isHost ? 'Room closed · everyone idle' : 'room closed'); lobby.rejoinCode = back; if (back) showStart(); return; }
   // the host also clears out a client that has sat idle past the limit, in case its tab cannot do it itself
-  if (net.isHost) for (const [id, r] of remote) if (r.idle && r.idleSince && performance.now() / 1000 - r.idleSince > limit - IDLE_FLAG + 15) { net.sendTo(id, 'kick', { reason: 'was' }); const c = net.conns.get(id); setTimeout(() => { try { c && c.close(); } catch (e) { /* ignore */ } }, 500); }
+  if (net.isHost) for (const [id, r] of remote) if (r.idle && r.idleSince && performance.now() / 1000 - r.idleSince > limit - IDLE_FLAG + 15) { net.sendTo(id, 'kick', { reason: 'room closed' }); const c = net.conns.get(id); setTimeout(() => { try { c && c.close(); } catch (e) { /* ignore */ } }, 500); }
 }
-net.on('kick', (d) => { const back = String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(d && d.reason || 'was'); lobby.rejoinCode = back; if (back) showStart(); });
+net.on('kick', (d) => { const back = String(net.aliasCode || net.code || '').replace(/-\d+$/, ''); leaveOnline(d && d.reason || 'room closed'); lobby.rejoinCode = back; if (back) showStart(); });
 let syncTick = 0;
 function netUpdate(dt) {
   idleUpdate(dt);
@@ -578,16 +578,16 @@ async function joinLobby(code) {
 async function quickPlay() {
   try { await net.quickJoin({ name: myName }, setStatus); lobby.isPublic = true; lobby.status = ''; game.state = 'lobby'; screen = 'lobby'; showStart(); return; }
   catch (err) { if (!/no open public/.test(String(err.message))) { setStatus(friendlyError(err)); unlockButtons(); return; } }
-  setStatus('Lobby · YouPublicLobby…');
+  setStatus('Room · Open');
   await createLobby(true);
 }
 function friendlyError(err) {
   const m = String(err && err.message || err || ''); if (!m) return 'Something went wrong';
   if (/networking library/.test(m)) return 'Online · Check your network and refresh the page';
-  if (/timed out|signalling/.test(m)) return 'Could not connect to matchmaking server · You';
-  if (/no lobby with that code/.test(m)) return 'CodeLobby · Check the code with your friend';
-  if (/no answer/.test(m)) return 'Lobby · YouSomeone';
-  if (/full/.test(m)) return 'LobbyFull · Try another code';
+  if (/timed out|signalling/.test(m)) return 'Matchmaking unavailable · check your connection';
+  if (/no lobby with that code/.test(m)) return 'Room code not found · check with your friend';
+  if (/no answer/.test(m)) return 'No room response · try again';
+  if (/full/.test(m)) return 'Room full · try another code';
   if (/leave the lobby/.test(m)) return 'LeaveYouLobby';
   return m;
 }
@@ -627,17 +627,17 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 function mainHTML() {
   return `<h1>DodNite</h1><h2>DodNite</h2>
-    <div class="mainbtns"><button type="button" class="start" id="soloBtn">Start Game<i>Solo ·  waves waves</i></button><button type="button" id="onlineBtn">Online Match<i>Free-for-all · up to 10 players</i></button></div>
-    ${mapHTML(mapKey, true)}${START_CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">Best score：${best}</div>` : ''}`;
+    <div class="mainbtns"><button type="button" class="start" id="soloBtn">Launch Run<i>Solo · endless rounds</i></button><button type="button" id="onlineBtn">Rival Rush<i>Up to 10 rivals</i></button></div>
+    ${mapHTML(mapKey, true)}${START_CONTROLS_HTML}${settingsHTML()}${checkpointHTML()}${best ? `<div class="beststat">Best Run · ${best}</div>` : ''}`;
 }
 function onlineHTML() {
-  return `<h1>Online Match</h1><h2>Free-for-all · First to ${FFA_TARGET} kills · up to 10 players</h2>
+  return `<h1>Rival Rush</h1><h2>First to ${FFA_TARGET} points · up to 10 rivals</h2>
     <div class="online" id="online">
       <div class="row"><span>You</span><input type="text" class="namebox" id="setName" maxlength="14" value="${esc(myName)}"></div>
-      <div class="row"><button type="button" class="big" id="quickBtn">Quick Match</button><span class="hint">JoinPublicLobby；You</span></div>
+      <div class="row"><button type="button" class="big" id="quickBtn">Quick Room</button><span class="hint">Find an open room</span></div>
       <div class="row split"><span>or</span></div>
-      <div class="row"><button type="button" id="createBtn">Lobby</button><div class="radio"><label><input type="radio" name="vis" value="public" ${lobby.isPublic ? 'checked' : ''}> Public</label><label><input type="radio" name="vis" value="private" ${lobby.isPublic ? '' : 'checked'}> Private · Friends only</label></div></div>
-      <div class="row"><span>LobbyCode？</span><input type="text" id="codeBox" placeholder="Code" maxlength="5" autocomplete="off"><button type="button" id="joinBtn">Join</button></div>
+      <div class="row"><button type="button" id="createBtn">Create Room</button><div class="radio"><label><input type="radio" name="vis" value="public" ${lobby.isPublic ? 'checked' : ''} > Open</label><label><input type="radio" name="vis" value="private" ${lobby.isPublic ? '' : 'checked'}> Invite Only</label></div></div>
+      <div class="row"><span>Room Code</span><input type="text" id="codeBox" placeholder="Code" maxlength="5" autocomplete="off"><button type="button" id="joinBtn">Enter</button></div>
       <div class="lobbylist" id="lobbylist"><div class="row"><span>PublicLobby</span><button type="button" class="alt" id="refreshBtn">Refresh</button></div><div class="rows" id="lobbyRows">${lobbyListHTML()}</div></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div>
       ${lobby.rejoinCode ? `<div class="row"><button type="button" class="big" id="rejoinBtn">Join ${esc(lobby.rejoinCode)}</button></div>` : ''}
@@ -646,11 +646,11 @@ function onlineHTML() {
 }
 function lobbyHTML() {
   const rows = lobbyRows(); const host = net.isHost; const n = rows.length;
-  return `<h1>Lobby</h1><h2>Free-for-all · First to ${FFA_TARGET} kills · ${n}/${net.maxPlayers} players</h2>
+  return `<h1>Room</h1><h2>First to ${FFA_TARGET} points · ${n}/${net.maxPlayers} rivals</h2>
     <div class="online" id="online">
       <div class="row"><span>Code</span><span class="code">${String(net.isHost ? (net.aliasCode || net.code) : (lobby.shown || net.code) || '').replace(/-\d+$/, '')}</span></div>
       ${mapHTML(lobby.map || mapKey, host)}
-      <div class="hint">${lobby.isPublic ? 'LobbyPublic：Quick MatchorCodeJoin' : 'PrivateLobby：Friends can join via「Online Match → Join」Code'}</div>
+      <div class="hint">${lobby.isPublic ? 'Open room · quick join or room code' : 'Invite-only room · share the code with friends'}</div>
       <div class="plist">${rows.map((p) => `<div class="${p.id === lobby.hostId ? 'host' : ''}${p.id === net.id ? ' me' : ''}"><span>${esc(p.name)}</span><span>${p.id === net.id ? 'You' : ''}</span></div>`).join('')}</div>
       <div class="row"><button type="button" class="big" id="startBtn">Start Match</button><button type="button" class="alt" id="leaveBtn">Leave</button></div>
       <div class="status" id="status">${esc(lobby.status || '')}</div><div class="hint">Anyone can start · ${n < 2 ? 'Join' : n + ' players'}</div>
@@ -659,14 +659,14 @@ function lobbyHTML() {
 let lobbyList = null, listBusy = false;
 function lobbyListHTML() {
   if (listBusy) return '<div class="hint">Searching…</div>';
-  if (!lobbyList) return '<div class="hint">Click「Refresh」Lobby</div>';
-  if (!lobbyList.length) return '<div class="hint">Click「Quick Match」JoinLobby</div>';
+  if (!lobbyList) return '<div class="hint">Refresh rooms</div>';
+  if (!lobbyList.length) return '<div class="hint">Find an open room</div>';
   return lobbyList.map((l) => `<div class="lobbyrow"><span class="code">${esc(l.code)}</span><span>${esc(l.hostName || 'Someone')} Lobby</span><span>${l.players}/${l.max}${l.inMatch ? ' · in match' : ''}</span>${l.full ? '<span class="status">Full</span>' : `<button type="button" data-join="${esc(l.code)}">Join</button>`}</div>`).join('');
 }
 async function refreshLobbies() {
   if (listBusy || net.active) return; listBusy = true; const box = hud.el.panel.querySelector('#lobbyRows'); if (box) box.innerHTML = lobbyListHTML();
   let err = null; try { lobbyList = await net.listLobbies({ name: myName }); } catch (e) { lobbyList = []; err = e; }
-  listBusy = false; const rows = hud.el.panel.querySelector('#lobbyRows'); if (rows) rows.innerHTML = err ? `<div class="hint">Search failed：${esc(friendlyError(err))}</div>` : lobbyListHTML();
+  listBusy = false; const rows = hud.el.panel.querySelector('#lobbyRows'); if (rows) rows.innerHTML = err ? `<div class="hint">Search failed: ${esc(friendlyError(err))}</div>` : lobbyListHTML();
 }
 function wireOnline() {
   const box = hud.el.panel.querySelector('#online'); if (!box) return;
@@ -680,7 +680,7 @@ function wireOnline() {
   if (q('refreshBtn')) { q('refreshBtn').addEventListener('click', () => refreshLobbies()); if (!lobbyList && !listBusy) refreshLobbies(); }
   if (q('lobbyRows')) q('lobbyRows').addEventListener('click', (e) => { const b = e.target.closest('button[data-join]'); if (b) { lockButtons(box); joinLobby(b.dataset.join); } });
   wireMap((k) => { if (net.isHost) { lobby.map = k; broadcastLobby(); } });
-  if (q('startBtn')) q('startBtn').addEventListener('click', () => { if (net.isHost) hostStart(); else { net.send('startreq', {}); setStatus('Requesting host to start…'); } });
+  if (q('startBtn')) q('startBtn').addEventListener('click', () => { if (net.isHost) hostStart(); else { net.send('startreq', {}); setStatus('Waiting for host…'); } });
   if (q('leaveBtn')) q('leaveBtn').addEventListener('click', () => { lobby.rejoinCode = null; leaveOnline(''); });
 }
 function lockButtons(box) { for (const b of box.querySelectorAll('button')) if (b.id !== 'backBtn') b.disabled = true; }
@@ -700,16 +700,16 @@ function showStart() {
 }
 function showPause() {
   if (online()) {
-    hud.showScreen(`<h1>Menu</h1><h2>Free-for-all · Lobby ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Leave</button></div></div><div class="go">Click（orpress ${hud.key('confirm')}）to continue</div>`);
+    hud.showScreen(`<h1>Hub</h1><h2>Rival Rush · Room ${String(net.aliasCode || net.code || '').replace(/-\d+$/, '')}</h2><div class="scoreboard">${sortedScores().map(([id, s]) => `<div class="${id === net.id ? 'me' : ''}"><span>${esc(s.name)}</span><span>${s.kills} kills · ${s.deaths} deaths</span></div>`).join('')}</div>${CONTROLS_HTML}${settingsHTML()}<div class="online" id="online"><div class="row"><button type="button" class="alt" id="leaveBtn">Leave</button></div></div><div class="go">Press ${hud.key('confirm')} or click to continue</div>`);
     wireSettings(); wireOnline(); return;
   }
-  hud.showScreen(`<h1>Pause</h1><h2>Wave  ${game.wave}  waves ·  ${game.score}</h2>${CONTROLS_HTML}${settingsHTML()}${menuBtnHTML()}<div class="go">Click（orpress ${hud.key('confirm')}）Continue</div>`);
+  hud.showScreen(`<h1>Break</h1><h2>Round ${game.wave} · ${game.score} points</h2>${CONTROLS_HTML}${settingsHTML()}${menuBtnHTML()}<div class="go">Press ${hud.key('confirm')} or click to continue</div>`);
   wireSettings(); wireMenuBtn();
 }
-function showClickToPlay() { hud.showScreen(`<h1>Match started</h1><h2>Free-for-all · First to ${FFA_TARGET} kills</h2><div class="go">Click（orpress ${hud.key('confirm')}）to begin</div>`); }
+function showClickToPlay() { hud.showScreen(`<h1>Round Live</h1><h2>First to ${FFA_TARGET} points</h2><div class="go">Press ${hud.key('confirm')} or click to begin</div>`); }
 function showDead() {
   hud.setGameplayVisible(false); const nb = game.score > best; if (nb) { best = game.score; localStorage.setItem('doodle_best', String(best)); }
-  hud.showScreen(`<h1>waserased</h1><div class="stats">You <b>${game.wave}</b>  waves · <b>${game.kills}</b> kills ·  <b>${game.score}</b>${nb ? ' · <b>New record</b>' : ` · Best score ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Click（orpress ${hud.key('confirm')}）Draw again</div>`);
+  hud.showScreen(`<h1>waserased</h1><div class="stats">Round <b>${game.wave}</b> · <b>${game.kills}</b> takedowns · <b>${game.score}</b> points${nb ? ' · <b>New Best</b>' : ` · Best Run ${best}`}</div>${checkpointHTML()}${menuBtnHTML()}<div class="go">Press ${hud.key('confirm')} or click to run again</div>`);
   wireCheckpoints((w) => beginAtWave(w)); wireMenuBtn();
 }
 function menuBtnHTML() { return '<div class="online menubtn"><div class="row"><button type="button" class="alt" id="menuBtn">Menu</button></div></div>'; }
@@ -742,7 +742,7 @@ function startMatch(late, spawnIdx) {
   for (const r of remote.values()) r.lastSeen = performance.now();
   if (!scores.size) for (const [id, p] of lobby.players) scores.set(id, { name: p.name, kills: 0, deaths: 0 });
   const spots = spawnSpots(); player.reset(spawnIdx != null && spots[spawnIdx] ? spots[spawnIdx].clone() : arenaSpawn()); beginCommon(); game.state = 'play'; screen = 'lobby'; player.shieldT = 2;
-  refreshScoreHud(); hud.message('Free-for-all', late ? 'Youjoined' : 'First to ' + FFA_TARGET + ' kills · ' + Math.round(FFA_TIME / 60) + ' minutes · Everyone is a target', 3);
+  refreshScoreHud(); hud.message('Rival Rush', late ? 'You joined' : 'First to ' + FFA_TARGET + ' points · ' + Math.round(FFA_TIME / 60) + ' minutes · every rival is live', 3);
   hud.tip(`Hold <b>${hud.key('score')}</b> Scoreboard`, 5);
   // a match started by someone else's click cannot grab the mouse: ask for a click
   setTimeout(() => { if (game.state === 'play' && !input.pointerLocked && !input.usingGamepad) { game.menu = true; showClickToPlay(); } }, 250);
@@ -807,7 +807,7 @@ function step(now) {
         else if (before > 0) { game.respawnArm = input.lastActive; game.promptT = 0; }
         else if (!game.menu) {
           // waiting on a press: any key, button or click brings you back; pause opens the menu instead
-          game.promptT -= dt; if (game.promptT <= 0) { game.promptT = 1.4; hud.message('Ready', `press ${hud.key('confirm')} · pressorClick`, 1.5); }
+          game.promptT -= dt; if (game.promptT <= 0) { game.promptT = 1.4; hud.message('Ready', `press ${hud.key('confirm')} or click`, 1.5); }
           if (input.lastActive !== game.respawnArm && !input.pressed('pause') && !input.down('pause')) respawnLocal();
         }
       }
