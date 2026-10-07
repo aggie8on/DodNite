@@ -246,3 +246,6 @@ canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: bloc
 .voice-control.muted { background: rgba(255,230,220,.92); color: var(--red); }
 #hud.nogame .voice-control { display: none; }
 @media (max-width: 700px) { .voice-control { right: 3%; top: 18%; font-size: 16px; } }
+
+/* room voice control */
+.voice-room{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:16px;opacity:.85;margin:2px 0 2px}.voice-room-btn{font:inherit!important;font-size:20px!important;padding:5px 14px!important}.voice-room-btn.on{background:#e2f4e2!important;color:var(--ink)!important}.voice-room-btn.muted{background:#ffe5df!important;color:var(--red)!important}
