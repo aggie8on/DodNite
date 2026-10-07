@@ -15,7 +15,7 @@ export class VoiceChat {
   }
 
   _state() {
-    if (this.onState) this.onState({ enabled: this.enabled, muted: this.muted, peers: this.ready.size });
+    if (this.onState) this.onState({ enabled: this.enabled, muted: this.muted, peers: Math.max(0, this.ready.size - (this.enabled ? 1 : 0)) });
   }
 
   async toggle() {
